@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Habitaciones from "./pages/Habitaciones";
 import Facturacion from "./pages/Facturacion";
+import Transacciones from "./pages/Transacciones";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +23,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/habitaciones" element={<Habitaciones />} />
             <Route path="/facturacion" element={<Facturacion />} />
-            <Route path="/transacciones" element={<Dashboard />} />
+            <Route path="/transacciones" element={<Transacciones />} />
             <Route path="/reportes" element={<Dashboard />} />
             <Route path="/usuarios" element={<Dashboard />} />
             <Route path="/configuracion" element={<Dashboard />} />
