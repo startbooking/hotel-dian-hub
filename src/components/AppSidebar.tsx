@@ -5,9 +5,13 @@ import {
   TrendingUp, 
   Settings,
   DollarSign,
-  Users
+  Users,
+  UserCog,
+  Calculator,
+  FileCheck,
+  ChevronDown
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -17,8 +21,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -30,8 +39,18 @@ const menuItems = [
   { title: "Configuración", url: "/configuracion", icon: Settings },
 ];
 
+const nominaSubItems = [
+  { title: "Empleados", url: "/nomina/empleados", icon: UserCog },
+  { title: "Liquidar Nómina", url: "/nomina/liquidar", icon: Calculator },
+  { title: "Documentos Contables", url: "/nomina/documentos", icon: FileCheck },
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
+  const location = useLocation();
+  const [nominaOpen, setNominaOpen] = useState(
+    location.pathname.startsWith('/nomina')
+  );
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -67,6 +86,52 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              {/* Nómina con Submenú */}
+              <Collapsible open={nominaOpen} onOpenChange={setNominaOpen}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                        location.pathname.startsWith('/nomina')
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium" 
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <Users className="h-5 w-5 flex-shrink-0" />
+                      {open && <span>Nómina</span>}
+                      {open && (
+                        <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${nominaOpen ? 'rotate-180' : ''}`} />
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {open && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {nominaSubItems.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild>
+                              <NavLink 
+                                to={subItem.url}
+                                className={({ isActive }) =>
+                                  `flex items-center gap-2 ${
+                                    isActive 
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                                      : "hover:bg-sidebar-accent/50"
+                                  }`
+                                }
+                              >
+                                <subItem.icon className="h-4 w-4" />
+                                <span>{subItem.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
