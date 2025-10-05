@@ -10,7 +10,10 @@ import {
   Calculator,
   FileCheck,
   ChevronDown,
-  Building2
+  Building2,
+  BookOpen,
+  FileType,
+  Briefcase
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -38,7 +41,6 @@ const menuItems = [
   { title: "Datos Compañía", url: "/companias", icon: Building2 },
   { title: "Reportes", url: "/reportes", icon: TrendingUp },
   { title: "Usuarios", url: "/usuarios", icon: Users },
-  { title: "Configuración", url: "/configuracion", icon: Settings },
 ];
 
 const nominaSubItems = [
@@ -47,11 +49,20 @@ const nominaSubItems = [
   { title: "Documentos Contables", url: "/nomina/documentos", icon: FileCheck },
 ];
 
+const configuracionSubItems = [
+  { title: "Plan de Cuentas (PUC)", url: "/configuracion/plan-cuentas", icon: BookOpen },
+  { title: "Tipos de Documentos", url: "/configuracion/tipos-documentos", icon: FileType },
+  { title: "Centros de Costo", url: "/configuracion/centros-costo", icon: Briefcase },
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
   const [nominaOpen, setNominaOpen] = useState(
     location.pathname.startsWith('/nomina')
+  );
+  const [configuracionOpen, setConfiguracionOpen] = useState(
+    location.pathname.startsWith('/configuracion')
   );
 
   return (
@@ -111,6 +122,52 @@ export function AppSidebar() {
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {nominaSubItems.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild>
+                              <NavLink 
+                                to={subItem.url}
+                                className={({ isActive }) =>
+                                  `flex items-center gap-2 ${
+                                    isActive 
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                                      : "hover:bg-sidebar-accent/50"
+                                  }`
+                                }
+                              >
+                                <subItem.icon className="h-4 w-4" />
+                                <span>{subItem.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Configuración con Submenú */}
+              <Collapsible open={configuracionOpen} onOpenChange={setConfiguracionOpen}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                        location.pathname.startsWith('/configuracion')
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium" 
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <Settings className="h-5 w-5 flex-shrink-0" />
+                      {open && <span>Configuración</span>}
+                      {open && (
+                        <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${configuracionOpen ? 'rotate-180' : ''}`} />
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {open && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {configuracionSubItems.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
                               <NavLink 
