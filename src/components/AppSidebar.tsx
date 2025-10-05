@@ -9,7 +9,8 @@ import {
   UserCog,
   Calculator,
   FileCheck,
-  ChevronDown
+  ChevronDown,
+  Building2
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -34,6 +35,7 @@ const menuItems = [
   { title: "Habitaciones", url: "/habitaciones", icon: Hotel },
   { title: "Facturación", url: "/facturacion", icon: FileText },
   { title: "Ingresos/Egresos", url: "/transacciones", icon: DollarSign },
+  { title: "Datos Compañía", url: "/companias", icon: Building2 },
   { title: "Reportes", url: "/reportes", icon: TrendingUp },
   { title: "Usuarios", url: "/usuarios", icon: Users },
   { title: "Configuración", url: "/configuracion", icon: Settings },

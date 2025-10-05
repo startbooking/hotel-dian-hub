@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Habitaciones from "./pages/Habitaciones";
 import Facturacion from "./pages/Facturacion";
 import Transacciones from "./pages/Transacciones";
+import Companias from "./pages/Companias";
 import Empleados from "./pages/nomina/Empleados";
 import LiquidarNomina from "./pages/nomina/LiquidarNomina";
 import GenerarDocumentos from "./pages/nomina/GenerarDocumentos";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/habitaciones" element={<Habitaciones />} />
             <Route path="/facturacion" element={<Facturacion />} />
             <Route path="/transacciones" element={<Transacciones />} />
+            <Route path="/companias" element={<Companias />} />
             <Route path="/nomina/empleados" element={<Empleados />} />
             <Route path="/nomina/liquidar" element={<LiquidarNomina />} />
             <Route path="/nomina/documentos" element={<GenerarDocumentos />} />
