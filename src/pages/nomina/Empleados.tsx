@@ -3,19 +3,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Search, Mail, Phone, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { UserPlus, Search, Mail, Phone, Calendar, Pencil, Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-interface Empleado {
+const empleadoSchema = z.object({
+  nombre: z.string().min(1, "El nombre es requerido"),
+  cedula: z.string().min(1, "La cédula es requerida"),
+  cargo: z.string().min(1, "El cargo es requerido"),
+  departamento: z.string().min(1, "El departamento es requerido"),
+  salario: z.string().min(1, "El salario es requerido"),
+  fechaIngreso: z.string().min(1, "La fecha de ingreso es requerida"),
+  estado: z.enum(["activo", "inactivo", "vacaciones"]),
+  email: z.string().email("Correo electrónico inválido"),
+  telefono: z.string().min(1, "El teléfono es requerido"),
+});
+
+type EmpleadoForm = z.infer<typeof empleadoSchema>;
+
+interface Empleado extends Omit<EmpleadoForm, 'salario'> {
   id: string;
-  nombre: string;
-  cedula: string;
-  cargo: string;
-  departamento: string;
   salario: number;
-  fechaIngreso: string;
-  estado: "activo" | "inactivo" | "vacaciones";
-  email: string;
-  telefono: string;
 }
 
 const empleadosData: Empleado[] = [
@@ -59,8 +73,92 @@ const empleadosData: Empleado[] = [
 
 export default function Empleados() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [empleados, setEmpleados] = useState<Empleado[]>(empleadosData);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingEmpleado, setEditingEmpleado] = useState<Empleado | null>(null);
+  const { toast } = useToast();
 
-  const filteredEmpleados = empleadosData.filter(emp =>
+  const form = useForm<EmpleadoForm>({
+    resolver: zodResolver(empleadoSchema),
+    defaultValues: {
+      nombre: "",
+      cedula: "",
+      cargo: "",
+      departamento: "",
+      salario: "",
+      fechaIngreso: "",
+      estado: "activo",
+      email: "",
+      telefono: "",
+    },
+  });
+
+  const handleOpenDialog = (empleado?: Empleado) => {
+    if (empleado) {
+      setEditingEmpleado(empleado);
+      form.reset({
+        nombre: empleado.nombre,
+        cedula: empleado.cedula,
+        cargo: empleado.cargo,
+        departamento: empleado.departamento,
+        salario: empleado.salario.toString(),
+        fechaIngreso: empleado.fechaIngreso,
+        estado: empleado.estado,
+        email: empleado.email,
+        telefono: empleado.telefono,
+      });
+    } else {
+      setEditingEmpleado(null);
+      form.reset({
+        nombre: "",
+        cedula: "",
+        cargo: "",
+        departamento: "",
+        salario: "",
+        fechaIngreso: "",
+        estado: "activo",
+        email: "",
+        telefono: "",
+      });
+    }
+    setDialogOpen(true);
+  };
+
+  const onSubmit = (data: EmpleadoForm) => {
+    if (editingEmpleado) {
+      setEmpleados(empleados.map(emp =>
+        emp.id === editingEmpleado.id
+          ? { ...emp, ...data, salario: parseFloat(data.salario) }
+          : emp
+      ));
+      toast({
+        title: "Empleado actualizado",
+        description: "El empleado ha sido actualizado exitosamente",
+      });
+    } else {
+      const nuevoEmpleado: Empleado = {
+        id: Date.now().toString(),
+        ...data,
+        salario: parseFloat(data.salario),
+      };
+      setEmpleados([...empleados, nuevoEmpleado]);
+      toast({
+        title: "Empleado creado",
+        description: "El empleado ha sido creado exitosamente",
+      });
+    }
+    setDialogOpen(false);
+  };
+
+  const handleDelete = (id: string) => {
+    setEmpleados(empleados.filter(emp => emp.id !== id));
+    toast({
+      title: "Empleado eliminado",
+      description: "El empleado ha sido eliminado exitosamente",
+    });
+  };
+
+  const filteredEmpleados = empleados.filter(emp =>
     emp.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.cedula.includes(searchTerm) ||
     emp.cargo.toLowerCase().includes(searchTerm.toLowerCase())
@@ -82,10 +180,161 @@ export default function Empleados() {
           <h1 className="text-3xl font-bold text-foreground">Empleados</h1>
           <p className="text-muted-foreground mt-1">Gestión de personal del hotel</p>
         </div>
-        <Button className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Nuevo Empleado
-        </Button>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2" onClick={() => handleOpenDialog()}>
+              <UserPlus className="h-4 w-4" />
+              Nuevo Empleado
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingEmpleado ? "Editar Empleado" : "Nuevo Empleado"}
+              </DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="nombre"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre Completo</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cedula"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cédula</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cargo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cargo</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="departamento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="salario"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Salario</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="fechaIngreso"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fecha de Ingreso</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo Electrónico</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="telefono"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="estado"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="activo">Activo</SelectItem>
+                            <SelectItem value="inactivo">Inactivo</SelectItem>
+                            <SelectItem value="vacaciones">Vacaciones</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editingEmpleado ? "Actualizar" : "Crear"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -157,7 +406,22 @@ export default function Empleados() {
                         <Badge variant={estadoBadge.variant}>
                           {estadoBadge.label}
                         </Badge>
-                        <Button variant="outline" size="sm">Ver Detalles</Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleOpenDialog(empleado)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleDelete(empleado.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

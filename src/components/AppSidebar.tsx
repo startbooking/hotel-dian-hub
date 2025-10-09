@@ -1,6 +1,5 @@
 import { 
   LayoutDashboard, 
-  Hotel, 
   FileText, 
   TrendingUp, 
   Settings,
@@ -13,7 +12,9 @@ import {
   Building2,
   BookOpen,
   FileType,
-  Briefcase
+  Briefcase,
+  Receipt,
+  CreditCard
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -35,12 +36,19 @@ import { useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Habitaciones", url: "/habitaciones", icon: Hotel },
-  { title: "Facturación", url: "/facturacion", icon: FileText },
   { title: "Ingresos/Egresos", url: "/transacciones", icon: DollarSign },
   { title: "Datos Compañía", url: "/companias", icon: Building2 },
+  { title: "Impuestos", url: "/impuestos", icon: Receipt },
   { title: "Reportes", url: "/reportes", icon: TrendingUp },
   { title: "Usuarios", url: "/usuarios", icon: Users },
+];
+
+const documentosSubItems = [
+  { title: "Facturar", url: "/documentos/facturar", icon: FileText },
+  { title: "Documento Soporte", url: "/documentos/soporte", icon: FileCheck },
+  { title: "Notas Crédito", url: "/documentos/notas-credito", icon: CreditCard },
+  { title: "Notas Débito", url: "/documentos/notas-debito", icon: CreditCard },
+  { title: "Nómina Electrónica", url: "/documentos/nomina", icon: Users },
 ];
 
 const nominaSubItems = [
@@ -58,6 +66,9 @@ const configuracionSubItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const location = useLocation();
+  const [documentosOpen, setDocumentosOpen] = useState(
+    location.pathname.startsWith('/documentos')
+  );
   const [nominaOpen, setNominaOpen] = useState(
     location.pathname.startsWith('/nomina')
   );
@@ -99,6 +110,52 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              {/* Documentos Electrónicos con Submenú */}
+              <Collapsible open={documentosOpen} onOpenChange={setDocumentosOpen}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+                        location.pathname.startsWith('/documentos')
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium" 
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      }`}
+                    >
+                      <FileText className="h-5 w-5 flex-shrink-0" />
+                      {open && <span>Documentos Electrónicos</span>}
+                      {open && (
+                        <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${documentosOpen ? 'rotate-180' : ''}`} />
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {open && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {documentosSubItems.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild>
+                              <NavLink 
+                                to={subItem.url}
+                                className={({ isActive }) =>
+                                  `flex items-center gap-2 ${
+                                    isActive 
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                                      : "hover:bg-sidebar-accent/50"
+                                  }`
+                                }
+                              >
+                                <subItem.icon className="h-4 w-4" />
+                                <span>{subItem.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Nómina con Submenú */}
               <Collapsible open={nominaOpen} onOpenChange={setNominaOpen}>

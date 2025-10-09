@@ -5,13 +5,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
-import Habitaciones from "./pages/Habitaciones";
-import Facturacion from "./pages/Facturacion";
 import Transacciones from "./pages/Transacciones";
 import Companias from "./pages/Companias";
+import Impuestos from "./pages/Impuestos";
 import Empleados from "./pages/nomina/Empleados";
 import LiquidarNomina from "./pages/nomina/LiquidarNomina";
 import GenerarDocumentos from "./pages/nomina/GenerarDocumentos";
+import Facturar from "./pages/documentos/Facturar";
+import DocumentoSoporte from "./pages/documentos/DocumentoSoporte";
+import NotasCredito from "./pages/documentos/NotasCredito";
+import NotasDebito from "./pages/documentos/NotasDebito";
+import NominaElectronica from "./pages/documentos/NominaElectronica";
 import Configuracion from "./pages/Configuracion";
 import PlanDeCuentas from "./pages/configuracion/PlanDeCuentas";
 import TiposDocumentos from "./pages/configuracion/TiposDocumentos";
@@ -29,10 +33,14 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/habitaciones" element={<Habitaciones />} />
-            <Route path="/facturacion" element={<Facturacion />} />
             <Route path="/transacciones" element={<Transacciones />} />
             <Route path="/companias" element={<Companias />} />
+            <Route path="/impuestos" element={<Impuestos />} />
+            <Route path="/documentos/facturar" element={<Facturar />} />
+            <Route path="/documentos/soporte" element={<DocumentoSoporte />} />
+            <Route path="/documentos/notas-credito" element={<NotasCredito />} />
+            <Route path="/documentos/notas-debito" element={<NotasDebito />} />
+            <Route path="/documentos/nomina" element={<NominaElectronica />} />
             <Route path="/nomina/empleados" element={<Empleados />} />
             <Route path="/nomina/liquidar" element={<LiquidarNomina />} />
             <Route path="/nomina/documentos" element={<GenerarDocumentos />} />
