@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
-import Transacciones from "./pages/Transacciones";
+import DocumentoContable from "./pages/DocumentoContable";
 import Companias from "./pages/Companias";
 import Impuestos from "./pages/Impuestos";
 import Empleados from "./pages/nomina/Empleados";
@@ -33,7 +33,7 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/transacciones" element={<Transacciones />} />
+            <Route path="/documento-contable" element={<DocumentoContable />} />
             <Route path="/companias" element={<Companias />} />
             <Route path="/impuestos" element={<Impuestos />} />
             <Route path="/documentos/facturar" element={<Facturar />} />
