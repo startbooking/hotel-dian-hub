@@ -14,7 +14,8 @@ import {
   FileType,
   Briefcase,
   Receipt,
-  CreditCard
+  CreditCard,
+  Upload
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -37,6 +38,7 @@ import { useState } from "react";
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Documento Contable", url: "/documento-contable", icon: FileCheck },
+  { title: "Importar Datos", url: "/importar", icon: Upload },
   { title: "Datos Compañía", url: "/companias", icon: Building2 },
   { title: "Impuestos", url: "/impuestos", icon: Receipt },
   { title: "Reportes", url: "/reportes", icon: TrendingUp },
