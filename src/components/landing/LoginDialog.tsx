@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +13,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock, Mail, Building2 } from "lucide-react";
 
-export function LoginModal() {
-  const { isAuthenticated, login } = useAuth();
+interface LoginDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +37,8 @@ export function LoginModal() {
         title: "Bienvenido",
         description: "Has iniciado sesión correctamente",
       });
+      onOpenChange(false);
+      navigate("/dashboard");
     } else {
       toast({
         title: "Error de autenticación",
@@ -42,27 +51,27 @@ export function LoginModal() {
   };
 
   return (
-    <Dialog open={!isAuthenticated}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
             <Building2 className="h-8 w-8 text-primary" />
           </div>
           <DialogTitle className="text-2xl font-bold text-center">
-            Sistema Contable
+            Iniciar Sesión
           </DialogTitle>
           <p className="text-muted-foreground text-center mt-2">
-            Ingrese sus credenciales para acceder
+            Ingrese sus credenciales para acceder al sistema
           </p>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="login-email">Correo electrónico</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                id="email"
+                id="login-email"
                 type="email"
                 placeholder="usuario@empresa.com"
                 value={email}
@@ -74,11 +83,11 @@ export function LoginModal() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="login-password">Contraseña</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                id="password"
+                id="login-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
