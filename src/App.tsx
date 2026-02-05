@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
 import DocumentoContable from "./pages/DocumentoContable";
 import ImportarDatos from "./pages/importar/ImportarDatos";
@@ -26,6 +27,132 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Protected route wrapper
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-primary">Cargando...</div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public route */}
+      <Route path="/" element={<LandingPage />} />
+      
+      {/* Protected routes */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Layout><Dashboard /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documento-contable" element={
+        <ProtectedRoute>
+          <Layout><DocumentoContable /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/importar" element={
+        <ProtectedRoute>
+          <Layout><ImportarDatos /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/companias" element={
+        <ProtectedRoute>
+          <Layout><Companias /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/impuestos" element={
+        <ProtectedRoute>
+          <Layout><Impuestos /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documentos/facturar" element={
+        <ProtectedRoute>
+          <Layout><Facturar /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documentos/soporte" element={
+        <ProtectedRoute>
+          <Layout><DocumentoSoporte /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documentos/notas-credito" element={
+        <ProtectedRoute>
+          <Layout><NotasCredito /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documentos/notas-debito" element={
+        <ProtectedRoute>
+          <Layout><NotasDebito /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documentos/nomina" element={
+        <ProtectedRoute>
+          <Layout><NominaElectronica /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/nomina/empleados" element={
+        <ProtectedRoute>
+          <Layout><Empleados /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/nomina/liquidar" element={
+        <ProtectedRoute>
+          <Layout><LiquidarNomina /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/nomina/documentos" element={
+        <ProtectedRoute>
+          <Layout><GenerarDocumentos /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/configuracion" element={
+        <ProtectedRoute>
+          <Layout><Configuracion /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/configuracion/plan-cuentas" element={
+        <ProtectedRoute>
+          <Layout><PlanDeCuentas /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/configuracion/tipos-documentos" element={
+        <ProtectedRoute>
+          <Layout><TiposDocumentos /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/configuracion/centros-costo" element={
+        <ProtectedRoute>
+          <Layout><CentrosDeCosto /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/reportes" element={
+        <ProtectedRoute>
+          <Layout><Dashboard /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/usuarios" element={
+        <ProtectedRoute>
+          <Layout><Dashboard /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -33,30 +160,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/documento-contable" element={<DocumentoContable />} />
-              <Route path="/importar" element={<ImportarDatos />} />
-              <Route path="/companias" element={<Companias />} />
-              <Route path="/impuestos" element={<Impuestos />} />
-              <Route path="/documentos/facturar" element={<Facturar />} />
-              <Route path="/documentos/soporte" element={<DocumentoSoporte />} />
-              <Route path="/documentos/notas-credito" element={<NotasCredito />} />
-              <Route path="/documentos/notas-debito" element={<NotasDebito />} />
-              <Route path="/documentos/nomina" element={<NominaElectronica />} />
-              <Route path="/nomina/empleados" element={<Empleados />} />
-              <Route path="/nomina/liquidar" element={<LiquidarNomina />} />
-              <Route path="/nomina/documentos" element={<GenerarDocumentos />} />
-              <Route path="/configuracion" element={<Configuracion />} />
-              <Route path="/configuracion/plan-cuentas" element={<PlanDeCuentas />} />
-              <Route path="/configuracion/tipos-documentos" element={<TiposDocumentos />} />
-              <Route path="/configuracion/centros-costo" element={<CentrosDeCosto />} />
-              <Route path="/reportes" element={<Dashboard />} />
-              <Route path="/usuarios" element={<Dashboard />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+          <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
