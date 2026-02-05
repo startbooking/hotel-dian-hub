@@ -1,4 +1,5 @@
 const API_BASE_URL = "http://backend.lan/acconunt/data";
+const AUTH_API_URL = "http://backend.lan/sactel";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -45,10 +46,32 @@ export interface Transaccion {
   metodoPago: string;
 }
 
+export type UserRole = "admin" | "contador" | "auxiliar" | "consultor";
+
+export interface BackendUser {
+  id: string;
+  email: string;
+  nombre: string;
+  role: UserRole;
+  password?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  user?: BackendUser;
+  token?: string;
+  error?: string;
+}
+
 class ApiService {
-  private async fetchData<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  private async fetchData<T>(endpoint: string, baseUrl: string = API_BASE_URL, options?: RequestInit): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
           "Content-Type": "application/json",
@@ -71,6 +94,27 @@ class ApiService {
     }
   }
 
+  // Authentication endpoints
+  async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    return this.fetchData<LoginResponse>("/login", AUTH_API_URL, {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
+  }
+
+  async getUsers(): Promise<ApiResponse<BackendUser[]>> {
+    return this.fetchData<BackendUser[]>("/users", AUTH_API_URL);
+  }
+
+  async validateToken(token: string): Promise<ApiResponse<BackendUser>> {
+    return this.fetchData<BackendUser>("/validate", AUTH_API_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  // Dashboard endpoints
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     return this.fetchData<DashboardStats>("/dashboard/stats");
   }
@@ -88,14 +132,14 @@ class ApiService {
   }
 
   async createFactura(factura: Partial<Factura>): Promise<ApiResponse<Factura>> {
-    return this.fetchData<Factura>("/facturas", {
+    return this.fetchData<Factura>("/facturas", API_BASE_URL, {
       method: "POST",
       body: JSON.stringify(factura),
     });
   }
 
   async updateHabitacion(id: string, data: Partial<Habitacion>): Promise<ApiResponse<Habitacion>> {
-    return this.fetchData<Habitacion>(`/habitaciones/${id}`, {
+    return this.fetchData<Habitacion>(`/habitaciones/${id}`, API_BASE_URL, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
