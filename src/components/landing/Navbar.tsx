@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Building2, LogIn, FileText, BookOpen } from "lucide-react";
+import { Building2, LogIn, FileText, BookOpen, Download } from "lucide-react";
 import { LoginDialog } from "./LoginDialog";
 
 export function Navbar() {
@@ -32,6 +32,11 @@ export function Navbar() {
             <Link to="/manual">
               <Button variant="ghost" size="sm" className="gap-1.5 hidden sm:inline-flex">
                 <BookOpen className="h-4 w-4" /> Manual
+              </Button>
+            </Link>
+            <Link to="/documento">
+              <Button variant="ghost" size="sm" className="gap-1.5 hidden sm:inline-flex">
+                <Download className="h-4 w-4" /> Documento
               </Button>
             </Link>
             <Button onClick={() => setShowLogin(true)} className="gap-2">
