@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LandingPage from "./pages/LandingPage";
+import Presentacion from "./pages/Presentacion";
+import ManualUsuario from "./pages/ManualUsuario";
 import Dashboard from "./pages/Dashboard";
 import DocumentoContable from "./pages/DocumentoContable";
 import ImportarDatos from "./pages/importar/ImportarDatos";
@@ -49,8 +51,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public route */}
+      {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/presentacion" element={<Presentacion />} />
+      <Route path="/manual" element={<ManualUsuario />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={

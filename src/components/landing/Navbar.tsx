@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Building2, LogIn } from "lucide-react";
+import { Building2, LogIn, FileText, BookOpen } from "lucide-react";
 import { LoginDialog } from "./LoginDialog";
 
 export function Navbar() {
@@ -11,7 +12,7 @@ export function Navbar() {
       <header className="fixed top-0 left-0 right-0 h-16 bg-card/95 backdrop-blur-sm border-b border-border z-50">
         <div className="container mx-auto h-full px-4 flex items-center justify-between">
           {/* Logo y nombre del proyecto */}
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
               <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
@@ -19,13 +20,25 @@ export function Navbar() {
               <h1 className="text-lg font-bold text-foreground">SACTEL</h1>
               <p className="text-xs text-muted-foreground">Sistema Contable</p>
             </div>
-          </div>
+          </Link>
 
-          {/* Botón de ingreso */}
-          <Button onClick={() => setShowLogin(true)} className="gap-2">
-            <LogIn className="h-4 w-4" />
-            Ingresar
-          </Button>
+          {/* Navegación + Ingreso */}
+          <div className="flex items-center gap-2">
+            <Link to="/presentacion">
+              <Button variant="ghost" size="sm" className="gap-1.5 hidden sm:inline-flex">
+                <FileText className="h-4 w-4" /> Presentación
+              </Button>
+            </Link>
+            <Link to="/manual">
+              <Button variant="ghost" size="sm" className="gap-1.5 hidden sm:inline-flex">
+                <BookOpen className="h-4 w-4" /> Manual
+              </Button>
+            </Link>
+            <Button onClick={() => setShowLogin(true)} className="gap-2">
+              <LogIn className="h-4 w-4" />
+              Ingresar
+            </Button>
+          </div>
         </div>
       </header>
 
