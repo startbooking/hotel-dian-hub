@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import Presentacion from "./pages/Presentacion";
 import ManualUsuario from "./pages/ManualUsuario";
+import DocumentoSACTEL from "./pages/DocumentoSACTEL";
 import Dashboard from "./pages/Dashboard";
 import DocumentoContable from "./pages/DocumentoContable";
 import ImportarDatos from "./pages/importar/ImportarDatos";
@@ -55,6 +56,7 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/presentacion" element={<Presentacion />} />
       <Route path="/manual" element={<ManualUsuario />} />
+      <Route path="/documento" element={<DocumentoSACTEL />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={
