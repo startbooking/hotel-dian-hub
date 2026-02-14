@@ -26,11 +26,14 @@ import Configuracion from "./pages/Configuracion";
 import PlanDeCuentas from "./pages/configuracion/PlanDeCuentas";
 import TiposDocumentos from "./pages/configuracion/TiposDocumentos";
 import CentrosDeCosto from "./pages/configuracion/CentrosDeCosto";
+import MediosMagneticos from "./pages/medios-magneticos/MediosMagneticos";
+import CertificadoRetenciones from "./pages/opciones/CertificadoRetenciones";
+import CertificadoIVA from "./pages/opciones/CertificadoIVA";
+import CertificadoICA from "./pages/opciones/CertificadoICA";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   
@@ -59,101 +62,29 @@ function AppRoutes() {
       <Route path="/documento" element={<DocumentoSACTEL />} />
       
       {/* Protected routes */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Layout><Dashboard /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documento-contable" element={
-        <ProtectedRoute>
-          <Layout><DocumentoContable /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/importar" element={
-        <ProtectedRoute>
-          <Layout><ImportarDatos /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/companias" element={
-        <ProtectedRoute>
-          <Layout><Companias /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/impuestos" element={
-        <ProtectedRoute>
-          <Layout><Impuestos /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documentos/facturar" element={
-        <ProtectedRoute>
-          <Layout><Facturar /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documentos/soporte" element={
-        <ProtectedRoute>
-          <Layout><DocumentoSoporte /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documentos/notas-credito" element={
-        <ProtectedRoute>
-          <Layout><NotasCredito /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documentos/notas-debito" element={
-        <ProtectedRoute>
-          <Layout><NotasDebito /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/documentos/nomina" element={
-        <ProtectedRoute>
-          <Layout><NominaElectronica /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/nomina/empleados" element={
-        <ProtectedRoute>
-          <Layout><Empleados /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/nomina/liquidar" element={
-        <ProtectedRoute>
-          <Layout><LiquidarNomina /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/nomina/documentos" element={
-        <ProtectedRoute>
-          <Layout><GenerarDocumentos /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/configuracion" element={
-        <ProtectedRoute>
-          <Layout><Configuracion /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/configuracion/plan-cuentas" element={
-        <ProtectedRoute>
-          <Layout><PlanDeCuentas /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/configuracion/tipos-documentos" element={
-        <ProtectedRoute>
-          <Layout><TiposDocumentos /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/configuracion/centros-costo" element={
-        <ProtectedRoute>
-          <Layout><CentrosDeCosto /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/reportes" element={
-        <ProtectedRoute>
-          <Layout><Dashboard /></Layout>
-        </ProtectedRoute>
-      } />
-      <Route path="/usuarios" element={
-        <ProtectedRoute>
-          <Layout><Dashboard /></Layout>
-        </ProtectedRoute>
-      } />
+      <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+      <Route path="/documento-contable" element={<ProtectedRoute><Layout><DocumentoContable /></Layout></ProtectedRoute>} />
+      <Route path="/importar" element={<ProtectedRoute><Layout><ImportarDatos /></Layout></ProtectedRoute>} />
+      <Route path="/companias" element={<ProtectedRoute><Layout><Companias /></Layout></ProtectedRoute>} />
+      <Route path="/impuestos" element={<ProtectedRoute><Layout><Impuestos /></Layout></ProtectedRoute>} />
+      <Route path="/medios-magneticos" element={<ProtectedRoute><Layout><MediosMagneticos /></Layout></ProtectedRoute>} />
+      <Route path="/documentos/facturar" element={<ProtectedRoute><Layout><Facturar /></Layout></ProtectedRoute>} />
+      <Route path="/documentos/soporte" element={<ProtectedRoute><Layout><DocumentoSoporte /></Layout></ProtectedRoute>} />
+      <Route path="/documentos/notas-credito" element={<ProtectedRoute><Layout><NotasCredito /></Layout></ProtectedRoute>} />
+      <Route path="/documentos/notas-debito" element={<ProtectedRoute><Layout><NotasDebito /></Layout></ProtectedRoute>} />
+      <Route path="/documentos/nomina" element={<ProtectedRoute><Layout><NominaElectronica /></Layout></ProtectedRoute>} />
+      <Route path="/nomina/empleados" element={<ProtectedRoute><Layout><Empleados /></Layout></ProtectedRoute>} />
+      <Route path="/nomina/liquidar" element={<ProtectedRoute><Layout><LiquidarNomina /></Layout></ProtectedRoute>} />
+      <Route path="/nomina/documentos" element={<ProtectedRoute><Layout><GenerarDocumentos /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion" element={<ProtectedRoute><Layout><Configuracion /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/plan-cuentas" element={<ProtectedRoute><Layout><PlanDeCuentas /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/tipos-documentos" element={<ProtectedRoute><Layout><TiposDocumentos /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/centros-costo" element={<ProtectedRoute><Layout><CentrosDeCosto /></Layout></ProtectedRoute>} />
+      <Route path="/opciones/certificado-retenciones" element={<ProtectedRoute><Layout><CertificadoRetenciones /></Layout></ProtectedRoute>} />
+      <Route path="/opciones/certificado-iva" element={<ProtectedRoute><Layout><CertificadoIVA /></Layout></ProtectedRoute>} />
+      <Route path="/opciones/certificado-ica" element={<ProtectedRoute><Layout><CertificadoICA /></Layout></ProtectedRoute>} />
+      <Route path="/reportes" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+      <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
