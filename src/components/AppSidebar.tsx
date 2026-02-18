@@ -1,7 +1,7 @@
 import { 
   LayoutDashboard, FileText, TrendingUp, Settings, DollarSign, Users, UserCog,
   Calculator, FileCheck, ChevronDown, Building2, BookOpen, FileType, Briefcase,
-  Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark
+  Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -116,6 +116,7 @@ const opcionesSubItems: MenuItem[] = [
   { title: "Certificado Retenciones", url: "/opciones/certificado-retenciones", icon: FileSpreadsheet },
   { title: "Certificado IVA", url: "/opciones/certificado-iva", icon: DollarSign },
   { title: "Certificado ICA", url: "/opciones/certificado-ica", icon: Landmark },
+  { title: "Solicitar Certificados", url: "/opciones/solicitud-certificados", icon: Mail },
 ];
 
 export function AppSidebar() {
