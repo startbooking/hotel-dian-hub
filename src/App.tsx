@@ -30,6 +30,7 @@ import MediosMagneticos from "./pages/medios-magneticos/MediosMagneticos";
 import CertificadoRetenciones from "./pages/opciones/CertificadoRetenciones";
 import CertificadoIVA from "./pages/opciones/CertificadoIVA";
 import CertificadoICA from "./pages/opciones/CertificadoICA";
+import SolicitudCertificados from "./pages/opciones/SolicitudCertificados";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ function AppRoutes() {
       <Route path="/opciones/certificado-retenciones" element={<ProtectedRoute><Layout><CertificadoRetenciones /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-iva" element={<ProtectedRoute><Layout><CertificadoIVA /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-ica" element={<ProtectedRoute><Layout><CertificadoICA /></Layout></ProtectedRoute>} />
+      <Route path="/opciones/solicitud-certificados" element={<ProtectedRoute><Layout><SolicitudCertificados /></Layout></ProtectedRoute>} />
       <Route path="/reportes" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
