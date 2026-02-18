@@ -31,6 +31,13 @@ import CertificadoRetenciones from "./pages/opciones/CertificadoRetenciones";
 import CertificadoIVA from "./pages/opciones/CertificadoIVA";
 import CertificadoICA from "./pages/opciones/CertificadoICA";
 import SolicitudCertificados from "./pages/opciones/SolicitudCertificados";
+import LibroAuxiliar from "./pages/reportes/LibroAuxiliar";
+import InformesTerceros from "./pages/reportes/InformesTerceros";
+import InformesCuenta from "./pages/reportes/InformesCuenta";
+import InformesCentro from "./pages/reportes/InformesCentro";
+import EstadoResultados from "./pages/reportes/EstadoResultados";
+import BalanceGeneral from "./pages/reportes/BalanceGeneral";
+import FlujosEfectivo from "./pages/reportes/FlujosEfectivo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,7 +92,14 @@ function AppRoutes() {
       <Route path="/opciones/certificado-iva" element={<ProtectedRoute><Layout><CertificadoIVA /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-ica" element={<ProtectedRoute><Layout><CertificadoICA /></Layout></ProtectedRoute>} />
       <Route path="/opciones/solicitud-certificados" element={<ProtectedRoute><Layout><SolicitudCertificados /></Layout></ProtectedRoute>} />
-      <Route path="/reportes" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+      {/* Reportes */}
+      <Route path="/reportes/libro-auxiliar" element={<ProtectedRoute><Layout><LibroAuxiliar /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/terceros" element={<ProtectedRoute><Layout><InformesTerceros /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/cuenta" element={<ProtectedRoute><Layout><InformesCuenta /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/centro" element={<ProtectedRoute><Layout><InformesCentro /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/estado-resultados" element={<ProtectedRoute><Layout><EstadoResultados /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/balance-general" element={<ProtectedRoute><Layout><BalanceGeneral /></Layout></ProtectedRoute>} />
+      <Route path="/reportes/flujos-efectivo" element={<ProtectedRoute><Layout><FlujosEfectivo /></Layout></ProtectedRoute>} />
       <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

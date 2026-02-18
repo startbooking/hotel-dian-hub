@@ -1,7 +1,8 @@
 import { 
   LayoutDashboard, FileText, TrendingUp, Settings, DollarSign, Users, UserCog,
   Calculator, FileCheck, ChevronDown, Building2, BookOpen, FileType, Briefcase,
-  Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail
+  Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail,
+  Scale, ArrowDownUp, BarChart3
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -88,7 +89,6 @@ const menuItems: MenuItem[] = [
   { title: "Datos Compañía", url: "/companias", icon: Building2 },
   { title: "Impuestos", url: "/impuestos", icon: Receipt },
   { title: "Medios Magnéticos", url: "/medios-magneticos", icon: Database },
-  { title: "Reportes", url: "/reportes", icon: TrendingUp },
   { title: "Usuarios", url: "/usuarios", icon: Users },
 ];
 
@@ -104,6 +104,16 @@ const nominaSubItems: MenuItem[] = [
   { title: "Empleados", url: "/nomina/empleados", icon: UserCog },
   { title: "Liquidar Nómina", url: "/nomina/liquidar", icon: Calculator },
   { title: "Documentos Contables", url: "/nomina/documentos", icon: FileCheck },
+];
+
+const reportesSubItems: MenuItem[] = [
+  { title: "Libro Auxiliar", url: "/reportes/libro-auxiliar", icon: BookOpen },
+  { title: "Informes por Terceros", url: "/reportes/terceros", icon: Users },
+  { title: "Informes por Cuenta", url: "/reportes/cuenta", icon: BarChart3 },
+  { title: "Informes por Centro", url: "/reportes/centro", icon: Briefcase },
+  { title: "Estado de Resultados", url: "/reportes/estado-resultados", icon: TrendingUp },
+  { title: "Balance General", url: "/reportes/balance-general", icon: Scale },
+  { title: "Flujos de Efectivo", url: "/reportes/flujos-efectivo", icon: ArrowDownUp },
 ];
 
 const configuracionSubItems: MenuItem[] = [
@@ -125,6 +135,7 @@ export function AppSidebar() {
 
   const [documentosOpen, setDocumentosOpen] = useState(location.pathname.startsWith("/documentos"));
   const [nominaOpen, setNominaOpen] = useState(location.pathname.startsWith("/nomina"));
+  const [reportesOpen, setReportesOpen] = useState(location.pathname.startsWith("/reportes"));
   const [configuracionOpen, setConfiguracionOpen] = useState(location.pathname.startsWith("/configuracion"));
   const [opcionesOpen, setOpcionesOpen] = useState(location.pathname.startsWith("/opciones"));
 
@@ -180,6 +191,16 @@ export function AppSidebar() {
                 items={nominaSubItems}
                 open={nominaOpen}
                 onOpenChange={setNominaOpen}
+                sidebarOpen={open}
+              />
+
+              <CollapsibleMenu
+                label="Reportes"
+                icon={TrendingUp}
+                basePath="/reportes"
+                items={reportesSubItems}
+                open={reportesOpen}
+                onOpenChange={setReportesOpen}
                 sidebarOpen={open}
               />
 
