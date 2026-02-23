@@ -1,5 +1,6 @@
 const API_BASE_URL = "http://backend.lan/acconunt/data";
 const AUTH_API_URL = "http://backend.lan/sactel";
+const CONT_API_URL = "http://backend.lan/sactel/apiCont";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -129,6 +130,31 @@ class ApiService {
 
   async getTransacciones(): Promise<ApiResponse<Transaccion[]>> {
     return this.fetchData<Transaccion[]>("/transacciones");
+  }
+
+  // Documentos contables endpoints
+  async getDocumentosContables(): Promise<ApiResponse<any[]>> {
+    return this.fetchData<any[]>("/documentos", CONT_API_URL);
+  }
+
+  async createDocumentoContable(documento: any): Promise<ApiResponse<any>> {
+    return this.fetchData<any>("/documentos", CONT_API_URL, {
+      method: "POST",
+      body: JSON.stringify(documento),
+    });
+  }
+
+  async updateDocumentoContable(id: string, documento: any): Promise<ApiResponse<any>> {
+    return this.fetchData<any>(`/documentos/${id}`, CONT_API_URL, {
+      method: "PUT",
+      body: JSON.stringify(documento),
+    });
+  }
+
+  async deleteDocumentoContable(id: string): Promise<ApiResponse<void>> {
+    return this.fetchData<void>(`/documentos/${id}`, CONT_API_URL, {
+      method: "DELETE",
+    });
   }
 
   async createFactura(factura: Partial<Factura>): Promise<ApiResponse<Factura>> {
