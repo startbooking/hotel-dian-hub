@@ -1,6 +1,8 @@
-const API_BASE_URL = "http://backend.lan/acconunt/data";
-const AUTH_API_URL = "http://backend.lan/sactel";
-const CONT_API_URL = "http://backend.lan/sactel/apiCont";
+const API_BASE_URL = import.meta.env.VITE_PMS_URL || "http://backend.lan/acconunt/data";
+const AUTH_API_URL = import.meta.env.VITE_AUTH_URL || "http://backend.lan/sactel";
+const CONT_API_URL = import.meta.env.VITE_CONTABILIDAD_URL || "http://sactel.lan/apiCont";
+const FACTURADOR_URL = import.meta.env.VITE_FACTURADOR_URL || "http://facturador.lan/api";
+const PMS_URL = import.meta.env.VITE_PMS_URL || "http://backend.lan/acconunt/data";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -35,6 +37,39 @@ export interface Factura {
   total: number;
   estado: "pagada" | "pendiente" | "anulada";
   dianAutorizada: boolean;
+}
+
+export interface FacturaElectronica {
+  id: string;
+  numero: string;
+  prefijo: string;
+  fecha: string;
+  fechaVencimiento: string;
+  cufe: string;
+  cliente: {
+    nombre: string;
+    nit: string;
+    direccion: string;
+    telefono: string;
+    email: string;
+  };
+  items: {
+    id: string;
+    codigo: string;
+    descripcion: string;
+    cantidad: number;
+    valorUnitario: number;
+    iva: number;
+    total: number;
+  }[];
+  subtotal: number;
+  iva: number;
+  total: number;
+  estado: "pendiente" | "pagada" | "anulada" | "enviada";
+  tipo: "factura" | "nota_credito" | "nota_debito";
+  zipUrl?: string;
+  xmlUrl?: string;
+  pdfUrl?: string;
 }
 
 export interface Transaccion {
@@ -95,6 +130,10 @@ class ApiService {
     }
   }
 
+  private getDownloadUrl(baseUrl: string, endpoint: string): string {
+    return `${baseUrl}${endpoint}`;
+  }
+
   // Authentication endpoints
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     return this.fetchData<LoginResponse>("/login", AUTH_API_URL, {
@@ -130,6 +169,23 @@ class ApiService {
 
   async getTransacciones(): Promise<ApiResponse<Transaccion[]>> {
     return this.fetchData<Transaccion[]>("/transacciones");
+  }
+
+  // Facturación electrónica - PMS endpoints
+  async getFacturasElectronicas(): Promise<ApiResponse<FacturaElectronica[]>> {
+    return this.fetchData<FacturaElectronica[]>("/facturas-electronicas", PMS_URL);
+  }
+
+  getFacturaZipUrl(facturaId: string): string {
+    return this.getDownloadUrl(FACTURADOR_URL, `/facturas/${facturaId}/zip`);
+  }
+
+  getFacturaXmlUrl(facturaId: string): string {
+    return this.getDownloadUrl(FACTURADOR_URL, `/facturas/${facturaId}/xml`);
+  }
+
+  getFacturaPdfUrl(facturaId: string): string {
+    return this.getDownloadUrl(FACTURADOR_URL, `/facturas/${facturaId}/pdf`);
   }
 
   // Documentos contables endpoints
