@@ -36,7 +36,7 @@ export interface FacturaData {
   subtotal: number;
   iva: number;
   total: number;
-  estado: "pendiente" | "pagada" | "anulada";
+  estado: "pendiente" | "pagada" | "anulada" | "enviada";
   observaciones?: string;
 }
 
