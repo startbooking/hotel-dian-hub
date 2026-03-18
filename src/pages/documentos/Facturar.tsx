@@ -2,102 +2,81 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Eye, FileText, Receipt, Download, FileArchive, FileCode } from "lucide-react";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Plus, Search, Eye, FileText, Receipt, CalendarIcon, FileArchive, FileCode } from "lucide-react";
 import { FacturaModal, FacturaData } from "@/components/facturacion/FacturaModal";
 import { api, FacturaElectronica } from "@/services/api";
 import { useCompany } from "@/contexts/CompanyContext";
 import { toast } from "sonner";
 
-// Datos de fallback
 const facturasMock: FacturaElectronica[] = [
   {
-    id: "1",
-    tipo: "factura",
-    numero: "FE-001",
-    prefijo: "FE",
-    fecha: "2024-01-15",
-    fechaVencimiento: "2024-02-15",
+    id: "1", tipo: "factura", numero: "FE-001", prefijo: "FE",
+    fecha: new Date().toISOString().split("T")[0], fechaVencimiento: "2024-02-15",
     cufe: "a1b2c3d4e5f6g7h8i9j0",
-    cliente: {
-      nombre: "Empresa ABC S.A.S",
-      nit: "900.123.456-7",
-      direccion: "Calle 100 #15-20, Bogotá",
-      telefono: "601 234 5678",
-      email: "contacto@empresaabc.com",
-    },
+    cliente: { nombre: "Empresa ABC S.A.S", nit: "900.123.456-7", direccion: "Calle 100 #15-20, Bogotá", telefono: "601 234 5678", email: "contacto@empresaabc.com" },
     items: [
       { id: "1", codigo: "SRV001", descripcion: "Servicio de consultoría", cantidad: 10, valorUnitario: 150000, iva: 285000, total: 1785000 },
       { id: "2", codigo: "SRV002", descripcion: "Implementación de software", cantidad: 1, valorUnitario: 5000000, iva: 950000, total: 5950000 },
     ],
-    subtotal: 6500000,
-    iva: 1235000,
-    total: 7735000,
-    estado: "pendiente",
+    subtotal: 6500000, iva: 1235000, total: 7735000, estado: "pendiente",
   },
   {
-    id: "2",
-    tipo: "factura",
-    numero: "FE-002",
-    prefijo: "FE",
-    fecha: "2024-01-18",
-    fechaVencimiento: "2024-02-18",
+    id: "2", tipo: "factura", numero: "FE-002", prefijo: "FE",
+    fecha: new Date().toISOString().split("T")[0], fechaVencimiento: "2024-02-18",
     cufe: "k1l2m3n4o5p6q7r8s9t0",
-    cliente: {
-      nombre: "Comercializadora XYZ Ltda",
-      nit: "800.987.654-3",
-      direccion: "Carrera 7 #45-10, Medellín",
-      telefono: "604 567 8901",
-      email: "ventas@xyz.com",
-    },
+    cliente: { nombre: "Comercializadora XYZ Ltda", nit: "800.987.654-3", direccion: "Carrera 7 #45-10, Medellín", telefono: "604 567 8901", email: "ventas@xyz.com" },
     items: [
       { id: "1", codigo: "PROD001", descripcion: "Licencia de software anual", cantidad: 5, valorUnitario: 1200000, iva: 1140000, total: 7140000 },
     ],
-    subtotal: 6000000,
-    iva: 1140000,
-    total: 7140000,
-    estado: "pagada",
+    subtotal: 6000000, iva: 1140000, total: 7140000, estado: "pagada",
   },
   {
-    id: "3",
-    tipo: "nota_credito",
-    numero: "NC-001",
-    prefijo: "NC",
-    fecha: "2024-01-20",
-    fechaVencimiento: "2024-01-20",
+    id: "3", tipo: "nota_credito", numero: "NC-001", prefijo: "NC",
+    fecha: "2024-01-20", fechaVencimiento: "2024-01-20",
     cufe: "u1v2w3x4y5z6a7b8c9d0",
-    cliente: {
-      nombre: "Empresa ABC S.A.S",
-      nit: "900.123.456-7",
-      direccion: "Calle 100 #15-20, Bogotá",
-      telefono: "601 234 5678",
-      email: "contacto@empresaabc.com",
-    },
+    cliente: { nombre: "Empresa ABC S.A.S", nit: "900.123.456-7", direccion: "Calle 100 #15-20, Bogotá", telefono: "601 234 5678", email: "contacto@empresaabc.com" },
     items: [
       { id: "1", codigo: "SRV001", descripcion: "Descuento por pronto pago", cantidad: 1, valorUnitario: 500000, iva: 95000, total: 595000 },
     ],
-    subtotal: 500000,
-    iva: 95000,
-    total: 595000,
-    estado: "pagada",
+    subtotal: 500000, iva: 95000, total: 595000, estado: "pagada",
   },
 ];
 
 export default function Facturar() {
   const [facturas, setFacturas] = useState<FacturaElectronica[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tipoFiltro, setTipoFiltro] = useState<string>("todos");
-  const [estadoFiltro, setEstadoFiltro] = useState<string>("todos");
   const [selectedFactura, setSelectedFactura] = useState<FacturaData | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const { company } = useCompany();
+
+  // Filtros tab "Facturas del Día"
+  const [filterCliente, setFilterCliente] = useState("");
+  const [filterNumero, setFilterNumero] = useState("");
+
+  // Filtros tab "Histórico"
+  const [histFechaDesde, setHistFechaDesde] = useState<Date | undefined>();
+  const [histFechaHasta, setHistFechaHasta] = useState<Date | undefined>();
+  const [histNumeroDesde, setHistNumeroDesde] = useState("");
+  const [histNumeroHasta, setHistNumeroHasta] = useState("");
+  const [histCliente, setHistCliente] = useState("");
+  const [histFacturas, setHistFacturas] = useState<FacturaElectronica[]>([]);
+  const [histLoading, setHistLoading] = useState(false);
 
   useEffect(() => {
     const fetchFacturas = async () => {
@@ -106,7 +85,6 @@ export default function Facturar() {
       if (response.success && response.data) {
         setFacturas(response.data);
       } else {
-        console.warn("No se pudieron cargar facturas del PMS, usando datos de ejemplo");
         setFacturas(facturasMock);
       }
       setIsLoading(false);
@@ -114,67 +92,126 @@ export default function Facturar() {
     fetchFacturas();
   }, []);
 
-  const facturasFiltradas = facturas.filter((factura) => {
-    const matchSearch =
-      factura.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      factura.cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      factura.cliente.nit.includes(searchTerm);
-    const matchTipo = tipoFiltro === "todos" || factura.tipo === tipoFiltro;
-    const matchEstado = estadoFiltro === "todos" || factura.estado === estadoFiltro;
-    return matchSearch && matchTipo && matchEstado;
-  });
+  const hoy = new Date().toISOString().split("T")[0];
+
+  const facturasDelDia = facturas
+    .filter((f) => f.fecha === hoy)
+    .filter((f) => {
+      const matchCliente = !filterCliente || f.cliente.nombre.toLowerCase().includes(filterCliente.toLowerCase());
+      const matchNumero = !filterNumero || f.numero.toLowerCase().includes(filterNumero.toLowerCase());
+      return matchCliente && matchNumero;
+    });
+
+  const handleBuscarHistorico = () => {
+    setHistLoading(true);
+    // Filtrar de todas las facturas (en producción sería un endpoint con parámetros)
+    const resultado = facturas.filter((f) => {
+      const fechaFactura = new Date(f.fecha);
+      const matchDesde = !histFechaDesde || fechaFactura >= histFechaDesde;
+      const matchHasta = !histFechaHasta || fechaFactura <= histFechaHasta;
+      const matchNumDesde = !histNumeroDesde || f.numero >= histNumeroDesde;
+      const matchNumHasta = !histNumeroHasta || f.numero <= histNumeroHasta;
+      const matchCliente = !histCliente || f.cliente.nombre.toLowerCase().includes(histCliente.toLowerCase());
+      return matchDesde && matchHasta && matchNumDesde && matchNumHasta && matchCliente;
+    });
+    setHistFacturas(resultado);
+    setHistLoading(false);
+    toast.success(`Se encontraron ${resultado.length} facturas`);
+  };
 
   const handleVerFactura = (factura: FacturaElectronica) => {
-    const modalData: FacturaData = {
-      ...factura,
-      observaciones: `CUFE: ${factura.cufe}`,
-    };
-    setSelectedFactura(modalData);
+    setSelectedFactura({ ...factura, observaciones: `CUFE: ${factura.cufe}` });
     setModalOpen(true);
   };
 
   const handleDownload = (facturaId: string, type: "zip" | "xml" | "pdf") => {
-    let url: string;
-    switch (type) {
-      case "zip":
-        url = api.getFacturaZipUrl(facturaId);
-        break;
-      case "xml":
-        url = api.getFacturaXmlUrl(facturaId);
-        break;
-      case "pdf":
-        url = api.getFacturaPdfUrl(facturaId);
-        break;
-    }
-    
-    // Open download in new tab
-    window.open(url, "_blank");
+    const urlMap = { zip: api.getFacturaZipUrl(facturaId), xml: api.getFacturaXmlUrl(facturaId), pdf: api.getFacturaPdfUrl(facturaId) };
+    window.open(urlMap[type], "_blank");
     toast.success(`Descargando ${type.toUpperCase()}...`);
   };
 
   const getTipoBadge = (tipo: FacturaElectronica["tipo"]) => {
-    switch (tipo) {
-      case "factura":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Factura</Badge>;
-      case "nota_credito":
-        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Nota Crédito</Badge>;
-      case "nota_debito":
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Nota Débito</Badge>;
-    }
+    const map = {
+      factura: <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Factura</Badge>,
+      nota_credito: <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Nota Crédito</Badge>,
+      nota_debito: <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Nota Débito</Badge>,
+    };
+    return map[tipo];
   };
 
   const getEstadoBadge = (estado: FacturaElectronica["estado"]) => {
-    switch (estado) {
-      case "pendiente":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendiente</Badge>;
-      case "pagada":
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Pagada</Badge>;
-      case "anulada":
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Anulada</Badge>;
-      case "enviada":
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Enviada</Badge>;
-    }
+    const map = {
+      pendiente: <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendiente</Badge>,
+      pagada: <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Pagada</Badge>,
+      anulada: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Anulada</Badge>,
+      enviada: <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Enviada</Badge>,
+    };
+    return map[estado];
   };
+
+  const renderFacturasTable = (data: FacturaElectronica[], loading: boolean) => (
+    loading ? (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-pulse text-muted-foreground">Cargando facturas...</div>
+      </div>
+    ) : (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Tipo</TableHead>
+            <TableHead>Número</TableHead>
+            <TableHead>Fecha</TableHead>
+            <TableHead>Cliente</TableHead>
+            <TableHead>NIT</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead className="text-center">Descargas</TableHead>
+            <TableHead className="text-center">Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((factura) => (
+            <TableRow key={factura.id}>
+              <TableCell>{getTipoBadge(factura.tipo)}</TableCell>
+              <TableCell className="font-medium">{factura.numero}</TableCell>
+              <TableCell>{factura.fecha}</TableCell>
+              <TableCell>{factura.cliente.nombre}</TableCell>
+              <TableCell>{factura.cliente.nit}</TableCell>
+              <TableCell className="text-right font-medium">
+                ${factura.total.toLocaleString("es-CO")}
+              </TableCell>
+              <TableCell>{getEstadoBadge(factura.estado)}</TableCell>
+              <TableCell>
+                <div className="flex items-center justify-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "zip")} title="Descargar ZIP">
+                    <FileArchive className="h-4 w-4 text-amber-600" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "xml")} title="Descargar XML">
+                    <FileCode className="h-4 w-4 text-green-600" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "pdf")} title="Descargar PDF">
+                    <FileText className="h-4 w-4 text-red-600" />
+                  </Button>
+                </div>
+              </TableCell>
+              <TableCell className="text-center">
+                <Button variant="ghost" size="sm" onClick={() => handleVerFactura(factura)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+          {data.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                No se encontraron documentos
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -204,9 +241,7 @@ export default function Facturar() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Facturas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {facturas.filter((f) => f.tipo === "factura").length}
-            </div>
+            <div className="text-2xl font-bold">{facturas.filter((f) => f.tipo === "factura").length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -214,9 +249,7 @@ export default function Facturar() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Notas Crédito</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {facturas.filter((f) => f.tipo === "nota_credito").length}
-            </div>
+            <div className="text-2xl font-bold">{facturas.filter((f) => f.tipo === "nota_credito").length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -224,9 +257,7 @@ export default function Facturar() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Pendientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {facturas.filter((f) => f.estado === "pendiente").length}
-            </div>
+            <div className="text-2xl font-bold text-yellow-600">{facturas.filter((f) => f.estado === "pendiente").length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -241,137 +272,107 @@ export default function Facturar() {
         </Card>
       </div>
 
-      {/* Filtros */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por número, cliente o NIT..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={tipoFiltro} onValueChange={setTipoFiltro}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Tipo de documento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos los tipos</SelectItem>
-                <SelectItem value="factura">Facturas</SelectItem>
-                <SelectItem value="nota_credito">Notas Crédito</SelectItem>
-                <SelectItem value="nota_debito">Notas Débito</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={estadoFiltro} onValueChange={setEstadoFiltro}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos los estados</SelectItem>
-                <SelectItem value="pendiente">Pendiente</SelectItem>
-                <SelectItem value="pagada">Pagada</SelectItem>
-                <SelectItem value="enviada">Enviada</SelectItem>
-                <SelectItem value="anulada">Anulada</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs */}
+      <Tabs defaultValue="hoy" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="hoy">Facturas del Día</TabsTrigger>
+          <TabsTrigger value="historico">Histórico de Facturas</TabsTrigger>
+        </TabsList>
 
-      {/* Tabla de documentos */}
-      <Card>
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-pulse text-muted-foreground">Cargando facturas del PMS...</div>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Número</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>NIT</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead className="text-center">Descargas</TableHead>
-                  <TableHead className="text-center">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {facturasFiltradas.map((factura) => (
-                  <TableRow key={factura.id}>
-                    <TableCell>{getTipoBadge(factura.tipo)}</TableCell>
-                    <TableCell className="font-medium">{factura.numero}</TableCell>
-                    <TableCell>{factura.fecha}</TableCell>
-                    <TableCell>{factura.cliente.nombre}</TableCell>
-                    <TableCell>{factura.cliente.nit}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      ${factura.total.toLocaleString("es-CO")}
-                    </TableCell>
-                    <TableCell>{getEstadoBadge(factura.estado)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownload(factura.id, "zip")}
-                          title="Descargar ZIP"
-                        >
-                          <FileArchive className="h-4 w-4 text-amber-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownload(factura.id, "xml")}
-                          title="Descargar XML"
-                        >
-                          <FileCode className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDownload(factura.id, "pdf")}
-                          title="Descargar PDF"
-                        >
-                          <FileText className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleVerFactura(factura)}
-                      >
-                        <Eye className="h-4 w-4" />
+        {/* Tab: Facturas del Día */}
+        <TabsContent value="hoy" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Filtrar por cliente..."
+                    value={filterCliente}
+                    onChange={(e) => setFilterCliente(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Filtrar por número de factura..."
+                    value={filterNumero}
+                    onChange={(e) => setFilterNumero(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              {renderFacturasTable(facturasDelDia, isLoading)}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Histórico */}
+        <TabsContent value="historico" className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                <div className="space-y-2">
+                  <Label>Fecha Desde</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !histFechaDesde && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {histFechaDesde ? format(histFechaDesde, "dd/MM/yyyy", { locale: es }) : "Seleccionar"}
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {facturasFiltradas.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      No se encontraron documentos
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={histFechaDesde} onSelect={setHistFechaDesde} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label>Fecha Hasta</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !histFechaHasta && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {histFechaHasta ? format(histFechaHasta, "dd/MM/yyyy", { locale: es }) : "Seleccionar"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={histFechaHasta} onSelect={setHistFechaHasta} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label>Factura Desde</Label>
+                  <Input placeholder="Ej: FE-001" value={histNumeroDesde} onChange={(e) => setHistNumeroDesde(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Factura Hasta</Label>
+                  <Input placeholder="Ej: FE-100" value={histNumeroHasta} onChange={(e) => setHistNumeroHasta(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cliente</Label>
+                  <Input placeholder="Nombre del cliente" value={histCliente} onChange={(e) => setHistCliente(e.target.value)} />
+                </div>
+                <Button onClick={handleBuscarHistorico} className="h-10">
+                  <Search className="mr-2 h-4 w-4" />
+                  Buscar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              {renderFacturasTable(histFacturas, histLoading)}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
-      <FacturaModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        factura={selectedFactura}
-      />
+      <FacturaModal open={modalOpen} onOpenChange={setModalOpen} factura={selectedFactura} />
     </div>
   );
 }
