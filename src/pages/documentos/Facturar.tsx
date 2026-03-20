@@ -206,8 +206,18 @@ export default function Facturar() {
     return map[estado] || <Badge variant="outline">{estado}</Badge>;
   };
 
-  const renderFacturasTable = (data: FacturaElectronica[], loading: boolean, showSelect = false) => (
-    loading ? (
+  const calcTotals = (data: FacturaElectronica[]) => ({
+    subtotal: data.reduce((s, f) => s + f.subtotal, 0),
+    iva: data.reduce((s, f) => s + f.iva, 0),
+    total: data.reduce((s, f) => s + f.total, 0),
+    count: data.length,
+  });
+
+  const fmtMoney = (v: number) => `$${v.toLocaleString("es-CO")}`;
+
+  const renderFacturasTable = (data: FacturaElectronica[], loading: boolean, showSelect = false) => {
+    const totals = calcTotals(data);
+    return loading ? (
       <div className="flex items-center justify-center py-12">
         <div className="animate-pulse text-muted-foreground">Cargando facturas...</div>
       </div>
@@ -228,6 +238,8 @@ export default function Facturar() {
             <TableHead>Fecha</TableHead>
             <TableHead>Cliente</TableHead>
             <TableHead>NIT</TableHead>
+            <TableHead className="text-right">Subtotal</TableHead>
+            <TableHead className="text-right">IVA</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead className="text-center">Descargas</TableHead>
@@ -253,9 +265,9 @@ export default function Facturar() {
                 <TableCell>{factura.fecha}</TableCell>
                 <TableCell>{factura.cliente.nombre}</TableCell>
                 <TableCell>{factura.cliente.nit}</TableCell>
-                <TableCell className="text-right font-medium">
-                  ${factura.total.toLocaleString("es-CO")}
-                </TableCell>
+                <TableCell className="text-right">{fmtMoney(factura.subtotal)}</TableCell>
+                <TableCell className="text-right">{fmtMoney(factura.iva)}</TableCell>
+                <TableCell className="text-right font-medium">{fmtMoney(factura.total)}</TableCell>
                 <TableCell>{getEstadoBadge(factura.estado)}</TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center gap-1">
@@ -280,15 +292,29 @@ export default function Facturar() {
           })}
           {data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={showSelect ? 10 : 9} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={showSelect ? 12 : 11} className="text-center py-8 text-muted-foreground">
                 No se encontraron documentos
               </TableCell>
             </TableRow>
           )}
         </TableBody>
+        {data.length > 0 && (
+          <tfoot>
+            <tr className="border-t-2 border-primary/20 bg-muted/50 font-semibold">
+              {showSelect && <td />}
+              <td colSpan={5} className="p-4 text-right">
+                Totales ({totals.count} documentos):
+              </td>
+              <td className="p-4 text-right">{fmtMoney(totals.subtotal)}</td>
+              <td className="p-4 text-right">{fmtMoney(totals.iva)}</td>
+              <td className="p-4 text-right text-primary font-bold">{fmtMoney(totals.total)}</td>
+              <td colSpan={3} />
+            </tr>
+          </tfoot>
+        )}
       </Table>
-    )
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">
