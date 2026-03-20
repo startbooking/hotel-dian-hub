@@ -213,6 +213,22 @@ class ApiService {
     });
   }
 
+  // Importar facturas a contabilidad
+  async importarFacturasContabilidad(facturas: FacturaElectronica[]): Promise<ApiResponse<any>> {
+    return this.fetchData<any>("/api/importarFacturas", CONT_API_URL, {
+      method: "POST",
+      body: JSON.stringify({ facturas }),
+    });
+  }
+
+  // Actualizar estado contabilizado en PMS
+  async actualizarEstadoFacturasPMS(facturaIds: string[]): Promise<ApiResponse<any>> {
+    return this.fetchData<any>("/facturas-electronicas/contabilizar", PMS_URL, {
+      method: "PUT",
+      body: JSON.stringify({ ids: facturaIds, estado: "contabilizada" }),
+    });
+  }
+
   async createFactura(factura: Partial<Factura>): Promise<ApiResponse<Factura>> {
     return this.fetchData<Factura>("/facturas", API_BASE_URL, {
       method: "POST",
