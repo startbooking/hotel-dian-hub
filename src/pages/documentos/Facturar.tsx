@@ -4,13 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
@@ -18,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Plus, Search, Eye, FileText, Receipt, CalendarIcon, FileArchive, FileCode } from "lucide-react";
+import { Plus, Search, Eye, FileText, Receipt, CalendarIcon, FileArchive, FileCode, Upload, CheckCircle, Loader2 } from "lucide-react";
 import { FacturaModal, FacturaData } from "@/components/facturacion/FacturaModal";
 import { api, FacturaElectronica } from "@/services/api";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -65,11 +63,9 @@ export default function Facturar() {
   const [modalOpen, setModalOpen] = useState(false);
   const { company } = useCompany();
 
-  // Filtros tab "Facturas del Día"
   const [filterCliente, setFilterCliente] = useState("");
   const [filterNumero, setFilterNumero] = useState("");
 
-  // Filtros tab "Histórico"
   const [histFechaDesde, setHistFechaDesde] = useState<Date | undefined>();
   const [histFechaHasta, setHistFechaHasta] = useState<Date | undefined>();
   const [histNumeroDesde, setHistNumeroDesde] = useState("");
@@ -77,6 +73,9 @@ export default function Facturar() {
   const [histCliente, setHistCliente] = useState("");
   const [histFacturas, setHistFacturas] = useState<FacturaElectronica[]>([]);
   const [histLoading, setHistLoading] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [importando, setImportando] = useState(false);
 
   useEffect(() => {
     const fetchFacturas = async () => {
@@ -104,7 +103,7 @@ export default function Facturar() {
 
   const handleBuscarHistorico = () => {
     setHistLoading(true);
-    // Filtrar de todas las facturas (en producción sería un endpoint con parámetros)
+    setSelectedIds(new Set());
     const resultado = facturas.filter((f) => {
       const fechaFactura = new Date(f.fecha);
       const matchDesde = !histFechaDesde || fechaFactura >= histFechaDesde;
@@ -130,6 +129,63 @@ export default function Facturar() {
     toast.success(`Descargando ${type.toUpperCase()}...`);
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (data: FacturaElectronica[]) => {
+    const seleccionables = data.filter((f) => (f as any).estado !== "contabilizada");
+    if (seleccionables.length > 0 && seleccionables.every((f) => selectedIds.has(f.id))) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(seleccionables.map((f) => f.id)));
+    }
+  };
+
+  const handleImportarContabilidad = async () => {
+    if (selectedIds.size === 0) {
+      toast.error("Seleccione al menos una factura para importar");
+      return;
+    }
+
+    const facturasSeleccionadas = histFacturas.filter((f) => selectedIds.has(f.id));
+    setImportando(true);
+
+    try {
+      const importResult = await api.importarFacturasContabilidad(facturasSeleccionadas);
+
+      if (!importResult.success) {
+        toast.error(importResult.error || "Error al importar facturas a contabilidad");
+        setImportando(false);
+        return;
+      }
+
+      const ids = Array.from(selectedIds);
+      const updateResult = await api.actualizarEstadoFacturasPMS(ids);
+
+      if (updateResult.success) {
+        setFacturas((prev) =>
+          prev.map((f) => (selectedIds.has(f.id) ? { ...f, estado: "contabilizada" as any } : f))
+        );
+        setHistFacturas((prev) =>
+          prev.map((f) => (selectedIds.has(f.id) ? { ...f, estado: "contabilizada" as any } : f))
+        );
+        setSelectedIds(new Set());
+        toast.success(`${ids.length} factura(s) importada(s) a contabilidad exitosamente`);
+      } else {
+        toast.warning("Facturas importadas pero no se pudo actualizar el estado en el PMS");
+      }
+    } catch {
+      toast.error("Error inesperado al importar facturas");
+    } finally {
+      setImportando(false);
+    }
+  };
+
   const getTipoBadge = (tipo: FacturaElectronica["tipo"]) => {
     const map = {
       factura: <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Factura</Badge>,
@@ -139,17 +195,18 @@ export default function Facturar() {
     return map[tipo];
   };
 
-  const getEstadoBadge = (estado: FacturaElectronica["estado"]) => {
-    const map = {
+  const getEstadoBadge = (estado: string) => {
+    const map: Record<string, JSX.Element> = {
       pendiente: <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pendiente</Badge>,
       pagada: <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Pagada</Badge>,
       anulada: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Anulada</Badge>,
       enviada: <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Enviada</Badge>,
+      contabilizada: <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><CheckCircle className="h-3 w-3 mr-1 inline" />Contabilizada</Badge>,
     };
-    return map[estado];
+    return map[estado] || <Badge variant="outline">{estado}</Badge>;
   };
 
-  const renderFacturasTable = (data: FacturaElectronica[], loading: boolean) => (
+  const renderFacturasTable = (data: FacturaElectronica[], loading: boolean, showSelect = false) => (
     loading ? (
       <div className="flex items-center justify-center py-12">
         <div className="animate-pulse text-muted-foreground">Cargando facturas...</div>
@@ -158,6 +215,14 @@ export default function Facturar() {
       <Table>
         <TableHeader>
           <TableRow>
+            {showSelect && (
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={data.filter((f) => (f as any).estado !== "contabilizada").length > 0 && data.filter((f) => (f as any).estado !== "contabilizada").every((f) => selectedIds.has(f.id))}
+                  onCheckedChange={() => toggleSelectAll(data)}
+                />
+              </TableHead>
+            )}
             <TableHead>Tipo</TableHead>
             <TableHead>Número</TableHead>
             <TableHead>Fecha</TableHead>
@@ -170,40 +235,52 @@ export default function Facturar() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((factura) => (
-            <TableRow key={factura.id}>
-              <TableCell>{getTipoBadge(factura.tipo)}</TableCell>
-              <TableCell className="font-medium">{factura.numero}</TableCell>
-              <TableCell>{factura.fecha}</TableCell>
-              <TableCell>{factura.cliente.nombre}</TableCell>
-              <TableCell>{factura.cliente.nit}</TableCell>
-              <TableCell className="text-right font-medium">
-                ${factura.total.toLocaleString("es-CO")}
-              </TableCell>
-              <TableCell>{getEstadoBadge(factura.estado)}</TableCell>
-              <TableCell>
-                <div className="flex items-center justify-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "zip")} title="Descargar ZIP">
-                    <FileArchive className="h-4 w-4 text-amber-600" />
+          {data.map((factura) => {
+            const contabilizada = (factura as any).estado === "contabilizada";
+            return (
+              <TableRow key={factura.id} className={contabilizada ? "opacity-60" : ""}>
+                {showSelect && (
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(factura.id)}
+                      onCheckedChange={() => toggleSelect(factura.id)}
+                      disabled={contabilizada}
+                    />
+                  </TableCell>
+                )}
+                <TableCell>{getTipoBadge(factura.tipo)}</TableCell>
+                <TableCell className="font-medium">{factura.numero}</TableCell>
+                <TableCell>{factura.fecha}</TableCell>
+                <TableCell>{factura.cliente.nombre}</TableCell>
+                <TableCell>{factura.cliente.nit}</TableCell>
+                <TableCell className="text-right font-medium">
+                  ${factura.total.toLocaleString("es-CO")}
+                </TableCell>
+                <TableCell>{getEstadoBadge(factura.estado)}</TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "zip")} title="Descargar ZIP">
+                      <FileArchive className="h-4 w-4 text-amber-600" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "xml")} title="Descargar XML">
+                      <FileCode className="h-4 w-4 text-green-600" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "pdf")} title="Descargar PDF">
+                      <FileText className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Button variant="ghost" size="sm" onClick={() => handleVerFactura(factura)}>
+                    <Eye className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "xml")} title="Descargar XML">
-                    <FileCode className="h-4 w-4 text-green-600" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDownload(factura.id, "pdf")} title="Descargar PDF">
-                    <FileText className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              </TableCell>
-              <TableCell className="text-center">
-                <Button variant="ghost" size="sm" onClick={() => handleVerFactura(factura)}>
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+              </TableRow>
+            );
+          })}
           {data.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={showSelect ? 10 : 9} className="text-center py-8 text-muted-foreground">
                 No se encontraron documentos
               </TableCell>
             </TableRow>
@@ -234,7 +311,6 @@ export default function Facturar() {
         </div>
       </div>
 
-      {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -272,35 +348,23 @@ export default function Facturar() {
         </Card>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="hoy" className="space-y-4">
         <TabsList>
           <TabsTrigger value="hoy">Facturas del Día</TabsTrigger>
           <TabsTrigger value="historico">Histórico de Facturas</TabsTrigger>
         </TabsList>
 
-        {/* Tab: Facturas del Día */}
         <TabsContent value="hoy" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Filtrar por cliente..."
-                    value={filterCliente}
-                    onChange={(e) => setFilterCliente(e.target.value)}
-                    className="pl-10"
-                  />
+                  <Input placeholder="Filtrar por cliente..." value={filterCliente} onChange={(e) => setFilterCliente(e.target.value)} className="pl-10" />
                 </div>
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Filtrar por número de factura..."
-                    value={filterNumero}
-                    onChange={(e) => setFilterNumero(e.target.value)}
-                    className="pl-10"
-                  />
+                  <Input placeholder="Filtrar por número de factura..." value={filterNumero} onChange={(e) => setFilterNumero(e.target.value)} className="pl-10" />
                 </div>
               </div>
             </CardContent>
@@ -312,7 +376,6 @@ export default function Facturar() {
           </Card>
         </TabsContent>
 
-        {/* Tab: Histórico */}
         <TabsContent value="historico" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
@@ -364,9 +427,32 @@ export default function Facturar() {
               </div>
             </CardContent>
           </Card>
+
+          {histFacturas.length > 0 && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {selectedIds.size > 0
+                  ? `${selectedIds.size} factura(s) seleccionada(s)`
+                  : "Seleccione facturas para importar a contabilidad"}
+              </p>
+              <Button
+                onClick={handleImportarContabilidad}
+                disabled={selectedIds.size === 0 || importando}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                {importando ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {importando ? "Importando..." : "Importar a Contabilidad"}
+              </Button>
+            </div>
+          )}
+
           <Card>
             <CardContent className="pt-6">
-              {renderFacturasTable(histFacturas, histLoading)}
+              {renderFacturasTable(histFacturas, histLoading, true)}
             </CardContent>
           </Card>
         </TabsContent>
