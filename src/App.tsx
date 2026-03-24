@@ -93,6 +93,10 @@ function AppRoutes() {
       <Route path="/configuracion/plan-cuentas" element={<ProtectedRoute><Layout><PlanDeCuentas /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/tipos-documentos" element={<ProtectedRoute><Layout><TiposDocumentos /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/centros-costo" element={<ProtectedRoute><Layout><CentrosDeCosto /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/tipos-contrato" element={<ProtectedRoute><Layout><TiposContrato /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/bancos" element={<ProtectedRoute><Layout><Bancos /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/eps" element={<ProtectedRoute><Layout><EPSPage /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/arl" element={<ProtectedRoute><Layout><ARLPage /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-retenciones" element={<ProtectedRoute><Layout><CertificadoRetenciones /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-iva" element={<ProtectedRoute><Layout><CertificadoIVA /></Layout></ProtectedRoute>} />
       <Route path="/opciones/certificado-ica" element={<ProtectedRoute><Layout><CertificadoICA /></Layout></ProtectedRoute>} />
