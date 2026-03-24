@@ -120,6 +120,10 @@ const configuracionSubItems: MenuItem[] = [
   { title: "Plan de Cuentas (PUC)", url: "/configuracion/plan-cuentas", icon: BookOpen },
   { title: "Tipos de Documentos", url: "/configuracion/tipos-documentos", icon: FileType },
   { title: "Centros de Costo", url: "/configuracion/centros-costo", icon: Briefcase },
+  { title: "Tipos de Contrato", url: "/configuracion/tipos-contrato", icon: FileCheck },
+  { title: "Bancos", url: "/configuracion/bancos", icon: Landmark },
+  { title: "EPS", url: "/configuracion/eps", icon: Users },
+  { title: "ARL", url: "/configuracion/arl", icon: Users },
 ];
 
 const opcionesSubItems: MenuItem[] = [
