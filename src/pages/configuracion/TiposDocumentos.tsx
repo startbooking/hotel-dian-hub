@@ -333,6 +333,7 @@ export default function TiposDocumentos() {
                 <TableHead>Prefijo</TableHead>
                 <TableHead>Consecutivo Inicial</TableHead>
                 <TableHead>Consecutivo Actual</TableHead>
+                <TableHead>Consecutivo</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -345,6 +346,11 @@ export default function TiposDocumentos() {
                   <TableCell>{tipo.prefijo}</TableCell>
                   <TableCell>{tipo.consecutivoInicial}</TableCell>
                   <TableCell>{tipo.consecutivoActual}</TableCell>
+                  <TableCell>
+                    <Badge variant={tipo.consecutivoAutomatico ? "default" : "secondary"}>
+                      {tipo.consecutivoAutomatico ? "Automático" : "Manual"}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     {tipo.bloqueado ? (
                       <span className="text-destructive">Bloqueado</span>
