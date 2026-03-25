@@ -355,7 +355,7 @@ export default function TiposDocumentos() {
                     {tipo.bloqueado ? (
                       <span className="text-destructive">Bloqueado</span>
                     ) : (
-                      <span className="text-green-600">Activo</span>
+                      <span className="text-primary">Activo</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
