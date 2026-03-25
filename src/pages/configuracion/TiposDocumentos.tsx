@@ -76,6 +76,7 @@ export default function TiposDocumentos() {
       prefijo: "",
       consecutivoInicial: "",
       consecutivoActual: "",
+      consecutivoAutomatico: true,
       descripcion: "",
     },
   });
