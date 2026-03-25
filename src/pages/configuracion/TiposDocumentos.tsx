@@ -23,6 +23,7 @@ const tipoDocumentoSchema = z.object({
   prefijo: z.string().min(1, "El prefijo es requerido"),
   consecutivoInicial: z.string().min(1, "El consecutivo inicial es requerido"),
   consecutivoActual: z.string().min(1, "El consecutivo actual es requerido"),
+  consecutivoAutomatico: z.boolean(),
   descripcion: z.string().optional(),
 });
 
