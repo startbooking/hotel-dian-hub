@@ -14,6 +14,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 const tipoDocumentoSchema = z.object({
   codigo: z.string().min(1, "El código es requerido"),
@@ -21,6 +23,7 @@ const tipoDocumentoSchema = z.object({
   prefijo: z.string().min(1, "El prefijo es requerido"),
   consecutivoInicial: z.string().min(1, "El consecutivo inicial es requerido"),
   consecutivoActual: z.string().min(1, "El consecutivo actual es requerido"),
+  consecutivoAutomatico: z.boolean(),
   descripcion: z.string().optional(),
 });
 
@@ -41,6 +44,7 @@ export default function TiposDocumentos() {
       prefijo: "FV",
       consecutivoInicial: "1",
       consecutivoActual: "150",
+      consecutivoAutomatico: true,
       descripcion: "Documento de venta a clientes",
       bloqueado: false,
     },
@@ -51,6 +55,7 @@ export default function TiposDocumentos() {
       prefijo: "RC",
       consecutivoInicial: "1",
       consecutivoActual: "85",
+      consecutivoAutomatico: false,
       descripcion: "Recibo de ingresos en efectivo",
       bloqueado: false,
     },
@@ -71,6 +76,7 @@ export default function TiposDocumentos() {
       prefijo: "",
       consecutivoInicial: "",
       consecutivoActual: "",
+      consecutivoAutomatico: true,
       descripcion: "",
     },
   });
@@ -154,6 +160,7 @@ export default function TiposDocumentos() {
       prefijo: "",
       consecutivoInicial: "",
       consecutivoActual: "",
+      consecutivoAutomatico: true,
       descripcion: "",
     });
     setIsDialogOpen(true);
@@ -259,6 +266,23 @@ export default function TiposDocumentos() {
                 </div>
                 <FormField
                   control={form.control}
+                  name="consecutivoAutomatico"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Consecutivo Automático</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Si está desactivado, el usuario deberá ingresar el número del documento manualmente al crear un documento contable.
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="descripcion"
                   render={({ field }) => (
                     <FormItem>
@@ -309,6 +333,7 @@ export default function TiposDocumentos() {
                 <TableHead>Prefijo</TableHead>
                 <TableHead>Consecutivo Inicial</TableHead>
                 <TableHead>Consecutivo Actual</TableHead>
+                <TableHead>Consecutivo</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -322,10 +347,15 @@ export default function TiposDocumentos() {
                   <TableCell>{tipo.consecutivoInicial}</TableCell>
                   <TableCell>{tipo.consecutivoActual}</TableCell>
                   <TableCell>
+                    <Badge variant={tipo.consecutivoAutomatico ? "default" : "secondary"}>
+                      {tipo.consecutivoAutomatico ? "Automático" : "Manual"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     {tipo.bloqueado ? (
                       <span className="text-destructive">Bloqueado</span>
                     ) : (
-                      <span className="text-green-600">Activo</span>
+                      <span className="text-primary">Activo</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
