@@ -266,6 +266,23 @@ export default function TiposDocumentos() {
                 </div>
                 <FormField
                   control={form.control}
+                  name="consecutivoAutomatico"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Consecutivo Automático</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Si está desactivado, el usuario deberá ingresar el número del documento manualmente al crear un documento contable.
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="descripcion"
                   render={({ field }) => (
                     <FormItem>
