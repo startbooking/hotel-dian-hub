@@ -118,6 +118,7 @@ const reportesSubItems: MenuItem[] = [
 
 const configuracionSubItems: MenuItem[] = [
   { title: "Plan de Cuentas (PUC)", url: "/configuracion/plan-cuentas", icon: BookOpen },
+  { title: "Plan Cuentas NIIF", url: "/configuracion/plan-cuentas-niif", icon: BookOpen },
   { title: "Tipos de Documentos", url: "/configuracion/tipos-documentos", icon: FileType },
   { title: "Centros de Costo", url: "/configuracion/centros-costo", icon: Briefcase },
   { title: "Tipos de Contrato", url: "/configuracion/tipos-contrato", icon: FileCheck },

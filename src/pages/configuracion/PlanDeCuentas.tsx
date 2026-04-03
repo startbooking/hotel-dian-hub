@@ -21,6 +21,9 @@ const cuentaSchema = z.object({
   naturaleza: z.enum(["debito", "credito"]),
   nivel: z.string().min(1, "El nivel es requerido"),
   cuentaPadre: z.string().optional(),
+  cuentaNIIF: z.string().optional(),
+  grupoNIIF: z.string().optional(),
+  clasificacionIFRS: z.string().optional(),
 });
 
 type CuentaFormData = z.infer<typeof cuentaSchema>;
@@ -41,6 +44,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "4",
       cuentaPadre: "11",
+      cuentaNIIF: "1.1.01",
+      grupoNIIF: "Activos",
+      clasificacionIFRS: "NIC 7",
       bloqueado: false,
     },
     {
@@ -51,6 +57,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "4",
       cuentaPadre: "11",
+      cuentaNIIF: "1.1.01",
+      grupoNIIF: "Activos",
+      clasificacionIFRS: "NIC 7",
       bloqueado: false,
     },
   ]);
@@ -72,6 +81,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "",
       cuentaPadre: "",
+      cuentaNIIF: "",
+      grupoNIIF: "",
+      clasificacionIFRS: "",
     },
   });
 
@@ -157,6 +169,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "",
       cuentaPadre: "",
+      cuentaNIIF: "",
+      grupoNIIF: "",
+      clasificacionIFRS: "",
     });
     setIsDialogOpen(true);
   };
@@ -291,6 +306,17 @@ export default function PlanDeCuentas() {
                     </FormItem>
                   )}
                 />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField control={form.control} name="cuentaNIIF" render={({ field }) => (
+                    <FormItem><FormLabel>Cuenta NIIF</FormLabel><FormControl><Input placeholder="1.1.01" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="grupoNIIF" render={({ field }) => (
+                    <FormItem><FormLabel>Grupo NIIF</FormLabel><FormControl><Input placeholder="Activos" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="clasificacionIFRS" render={({ field }) => (
+                    <FormItem><FormLabel>Clasificación IFRS</FormLabel><FormControl><Input placeholder="NIC 7" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
                 <DialogFooter>
                   <Button type="submit">
                     {editingCuenta ? "Actualizar" : "Crear"}
@@ -335,6 +361,7 @@ export default function PlanDeCuentas() {
             </Select>
           </div>
 
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -343,6 +370,9 @@ export default function PlanDeCuentas() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Naturaleza</TableHead>
                 <TableHead>Nivel</TableHead>
+                <TableHead>Cuenta NIIF</TableHead>
+                <TableHead>Grupo NIIF</TableHead>
+                <TableHead>IFRS</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -355,11 +385,14 @@ export default function PlanDeCuentas() {
                   <TableCell className="capitalize">{cuenta.tipo}</TableCell>
                   <TableCell className="capitalize">{cuenta.naturaleza}</TableCell>
                   <TableCell>{cuenta.nivel}</TableCell>
+                  <TableCell className="font-mono text-xs">{cuenta.cuentaNIIF || "—"}</TableCell>
+                  <TableCell className="text-xs">{cuenta.grupoNIIF || "—"}</TableCell>
+                  <TableCell className="text-xs">{cuenta.clasificacionIFRS || "—"}</TableCell>
                   <TableCell>
                     {cuenta.bloqueado ? (
                       <span className="text-destructive">Bloqueado</span>
                     ) : (
-                      <span className="text-green-600">Activo</span>
+                      <span className="text-primary">Activo</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -391,6 +424,7 @@ export default function PlanDeCuentas() {
               ))}
             </TableBody>
           </Table>
+          </div>
 
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-2">
