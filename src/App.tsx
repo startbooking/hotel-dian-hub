@@ -25,6 +25,7 @@ import NotasDebito from "./pages/documentos/NotasDebito";
 import NominaElectronica from "./pages/documentos/NominaElectronica";
 import Configuracion from "./pages/Configuracion";
 import PlanDeCuentas from "./pages/configuracion/PlanDeCuentas";
+import PlanCuentasNIIF from "./pages/configuracion/PlanCuentasNIIF";
 import TiposDocumentos from "./pages/configuracion/TiposDocumentos";
 import CentrosDeCosto from "./pages/configuracion/CentrosDeCosto";
 import TiposContrato from "./pages/configuracion/TiposContrato";
