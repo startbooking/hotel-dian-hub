@@ -95,6 +95,9 @@ const documentoSchema = z.object({
   retencionFuente: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, { message: "La retención en la fuente debe ser un número mayor o igual a 0" }),
   retencionIVA: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, { message: "La retención de IVA debe ser un número mayor o igual a 0" }),
   retencionICA: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, { message: "La retención de ICA debe ser un número mayor o igual a 0" }),
+  esNIIF: z.boolean().optional(),
+  cuentaNIIF: z.string().optional(),
+  conceptoNIIF: z.string().optional(),
 });
 
 type DocumentoFormValues = z.infer<typeof documentoSchema>;
