@@ -44,6 +44,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "4",
       cuentaPadre: "11",
+      cuentaNIIF: "1.1.01",
+      grupoNIIF: "Activos",
+      clasificacionIFRS: "NIC 7",
       bloqueado: false,
     },
     {
@@ -54,6 +57,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "4",
       cuentaPadre: "11",
+      cuentaNIIF: "1.1.01",
+      grupoNIIF: "Activos",
+      clasificacionIFRS: "NIC 7",
       bloqueado: false,
     },
   ]);
