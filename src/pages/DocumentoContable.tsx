@@ -142,6 +142,9 @@ interface Documento {
   retencionICA: number;
   total: number;
   cuentas: CuentaContable[];
+  esNIIF?: boolean;
+  cuentaNIIF?: string;
+  conceptoNIIF?: string;
 }
 
 // --- Helper: parse documento from API response ---
