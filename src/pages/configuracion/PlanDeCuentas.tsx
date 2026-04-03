@@ -81,6 +81,9 @@ export default function PlanDeCuentas() {
       naturaleza: "debito",
       nivel: "",
       cuentaPadre: "",
+      cuentaNIIF: "",
+      grupoNIIF: "",
+      clasificacionIFRS: "",
     },
   });
 
