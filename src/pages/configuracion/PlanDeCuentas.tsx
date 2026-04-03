@@ -306,6 +306,17 @@ export default function PlanDeCuentas() {
                     </FormItem>
                   )}
                 />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField control={form.control} name="cuentaNIIF" render={({ field }) => (
+                    <FormItem><FormLabel>Cuenta NIIF</FormLabel><FormControl><Input placeholder="1.1.01" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="grupoNIIF" render={({ field }) => (
+                    <FormItem><FormLabel>Grupo NIIF</FormLabel><FormControl><Input placeholder="Activos" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                  <FormField control={form.control} name="clasificacionIFRS" render={({ field }) => (
+                    <FormItem><FormLabel>Clasificación IFRS</FormLabel><FormControl><Input placeholder="NIC 7" {...field} /></FormControl><FormMessage /></FormItem>
+                  )} />
+                </div>
                 <DialogFooter>
                   <Button type="submit">
                     {editingCuenta ? "Actualizar" : "Crear"}
