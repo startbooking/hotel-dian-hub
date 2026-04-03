@@ -21,6 +21,9 @@ const cuentaSchema = z.object({
   naturaleza: z.enum(["debito", "credito"]),
   nivel: z.string().min(1, "El nivel es requerido"),
   cuentaPadre: z.string().optional(),
+  cuentaNIIF: z.string().optional(),
+  grupoNIIF: z.string().optional(),
+  clasificacionIFRS: z.string().optional(),
 });
 
 type CuentaFormData = z.infer<typeof cuentaSchema>;
