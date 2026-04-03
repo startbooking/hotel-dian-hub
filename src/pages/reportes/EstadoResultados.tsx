@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Printer, FileDown, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,35 +13,66 @@ interface LineaEstado {
   esBold?: boolean;
 }
 
+const lineasLocal: LineaEstado[] = [
+  { concepto: "INGRESOS OPERACIONALES", valor: 120000000, nivel: 0, esBold: true },
+  { concepto: "Ingresos por alojamiento", valor: 75000000, nivel: 1 },
+  { concepto: "Ingresos por restaurante", valor: 30000000, nivel: 1 },
+  { concepto: "Otros ingresos operacionales", valor: 15000000, nivel: 1 },
+  { concepto: "COSTOS DE VENTAS", valor: -45000000, nivel: 0, esBold: true },
+  { concepto: "Costos de alojamiento", valor: -20000000, nivel: 1 },
+  { concepto: "Costos de restaurante", valor: -18000000, nivel: 1 },
+  { concepto: "Otros costos", valor: -7000000, nivel: 1 },
+  { concepto: "UTILIDAD BRUTA", valor: 75000000, nivel: 0, esBold: true },
+  { concepto: "GASTOS OPERACIONALES", valor: -35000000, nivel: 0, esBold: true },
+  { concepto: "Gastos de administración", valor: -20000000, nivel: 1 },
+  { concepto: "Gastos de ventas", valor: -15000000, nivel: 1 },
+  { concepto: "UTILIDAD OPERACIONAL", valor: 40000000, nivel: 0, esBold: true },
+  { concepto: "Ingresos no operacionales", valor: 5000000, nivel: 1 },
+  { concepto: "Gastos no operacionales", valor: -3000000, nivel: 1 },
+  { concepto: "UTILIDAD ANTES DE IMPUESTOS", valor: 42000000, nivel: 0, esBold: true },
+  { concepto: "Provisión impuesto de renta", valor: -14700000, nivel: 1 },
+  { concepto: "UTILIDAD NETA", valor: 27300000, nivel: 0, esBold: true },
+];
+
+const lineasNIIF: LineaEstado[] = [
+  { concepto: "INGRESOS POR ACTIVIDADES ORDINARIAS (NIIF 15)", valor: 120000000, nivel: 0, esBold: true },
+  { concepto: "Ingresos por servicios de hospedaje", valor: 75000000, nivel: 1 },
+  { concepto: "Ingresos por servicios de alimentos y bebidas", valor: 30000000, nivel: 1 },
+  { concepto: "Otros ingresos ordinarios", valor: 15000000, nivel: 1 },
+  { concepto: "COSTO DE VENTAS", valor: -45000000, nivel: 0, esBold: true },
+  { concepto: "Costo de servicios prestados", valor: -38000000, nivel: 1 },
+  { concepto: "Otros costos", valor: -7000000, nivel: 1 },
+  { concepto: "GANANCIA BRUTA", valor: 75000000, nivel: 0, esBold: true },
+  { concepto: "GASTOS DE DISTRIBUCIÓN Y ADMINISTRACIÓN", valor: -36000000, nivel: 0, esBold: true },
+  { concepto: "Gastos de personal (NIC 19)", valor: -18000000, nivel: 1 },
+  { concepto: "Depreciación y amortización (NIC 16/38)", valor: -8000000, nivel: 1 },
+  { concepto: "Depreciación por derecho de uso (NIIF 16)", valor: -3000000, nivel: 1 },
+  { concepto: "Otros gastos administrativos", valor: -7000000, nivel: 1 },
+  { concepto: "GANANCIA OPERACIONAL", valor: 39000000, nivel: 0, esBold: true },
+  { concepto: "Ingresos financieros", valor: 2000000, nivel: 1 },
+  { concepto: "Costos financieros", valor: -4000000, nivel: 1 },
+  { concepto: "Intereses arrendamientos (NIIF 16)", valor: -1000000, nivel: 1 },
+  { concepto: "Diferencia en cambio (NIC 21)", valor: 500000, nivel: 1 },
+  { concepto: "GANANCIA ANTES DE IMPUESTOS", valor: 36500000, nivel: 0, esBold: true },
+  { concepto: "Gasto por impuesto a las ganancias (NIC 12)", valor: -12775000, nivel: 1 },
+  { concepto: "Impuesto diferido", valor: 1500000, nivel: 1 },
+  { concepto: "GANANCIA NETA DEL PERÍODO", valor: 25225000, nivel: 0, esBold: true },
+  { concepto: "OTRO RESULTADO INTEGRAL", valor: 0, nivel: 0, esBold: true },
+  { concepto: "Revaluación PP&E (NIC 16)", valor: 3000000, nivel: 1 },
+  { concepto: "RESULTADO INTEGRAL TOTAL", valor: 28225000, nivel: 0, esBold: true },
+];
+
 export default function EstadoResultados() {
   const [anio, setAnio] = useState("2024");
   const [mes, setMes] = useState("12");
   const [generado, setGenerado] = useState(false);
+  const [norma, setNorma] = useState<"local" | "niif">("local");
 
-  const lineas: LineaEstado[] = [
-    { concepto: "INGRESOS OPERACIONALES", valor: 120000000, nivel: 0, esBold: true },
-    { concepto: "Ingresos por alojamiento", valor: 75000000, nivel: 1 },
-    { concepto: "Ingresos por restaurante", valor: 30000000, nivel: 1 },
-    { concepto: "Otros ingresos operacionales", valor: 15000000, nivel: 1 },
-    { concepto: "COSTOS DE VENTAS", valor: -45000000, nivel: 0, esBold: true },
-    { concepto: "Costos de alojamiento", valor: -20000000, nivel: 1 },
-    { concepto: "Costos de restaurante", valor: -18000000, nivel: 1 },
-    { concepto: "Otros costos", valor: -7000000, nivel: 1 },
-    { concepto: "UTILIDAD BRUTA", valor: 75000000, nivel: 0, esBold: true },
-    { concepto: "GASTOS OPERACIONALES", valor: -35000000, nivel: 0, esBold: true },
-    { concepto: "Gastos de administración", valor: -20000000, nivel: 1 },
-    { concepto: "Gastos de ventas", valor: -15000000, nivel: 1 },
-    { concepto: "UTILIDAD OPERACIONAL", valor: 40000000, nivel: 0, esBold: true },
-    { concepto: "Ingresos no operacionales", valor: 5000000, nivel: 1 },
-    { concepto: "Gastos no operacionales", valor: -3000000, nivel: 1 },
-    { concepto: "UTILIDAD ANTES DE IMPUESTOS", valor: 42000000, nivel: 0, esBold: true },
-    { concepto: "Provisión impuesto de renta", valor: -14700000, nivel: 1 },
-    { concepto: "UTILIDAD NETA", valor: 27300000, nivel: 0, esBold: true },
-  ];
+  const lineas = norma === "niif" ? lineasNIIF : lineasLocal;
 
   const handleGenerar = () => {
     setGenerado(true);
-    toast.success("Estado de resultados generado");
+    toast.success(`Estado de resultados generado (${norma === "niif" ? "NIIF" : "Local"})`);
   };
 
   return (
@@ -54,9 +86,9 @@ export default function EstadoResultados() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Período</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Período y Normatividad</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Select value={anio} onValueChange={setAnio}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -72,6 +104,12 @@ export default function EstadoResultados() {
                 ))}
               </SelectContent>
             </Select>
+            <Tabs value={norma} onValueChange={(v) => setNorma(v as "local" | "niif")} className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="local" className="flex-1">Local</TabsTrigger>
+                <TabsTrigger value="niif" className="flex-1">NIIF</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <Button onClick={handleGenerar}><Search className="mr-2 h-4 w-4" />Generar</Button>
           </div>
         </CardContent>
@@ -81,7 +119,9 @@ export default function EstadoResultados() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Estado de Resultados - {anio}</CardTitle>
+              <CardTitle>
+                {norma === "niif" ? "Estado de Resultado Integral (NIIF)" : "Estado de Resultados"} - {anio}
+              </CardTitle>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm"><Printer className="mr-2 h-4 w-4" />Imprimir</Button>
                 <Button variant="outline" size="sm"><FileDown className="mr-2 h-4 w-4" />Exportar</Button>
