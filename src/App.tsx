@@ -92,6 +92,7 @@ function AppRoutes() {
       <Route path="/nomina/documentos" element={<ProtectedRoute><Layout><GenerarDocumentos /></Layout></ProtectedRoute>} />
       <Route path="/configuracion" element={<ProtectedRoute><Layout><Configuracion /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/plan-cuentas" element={<ProtectedRoute><Layout><PlanDeCuentas /></Layout></ProtectedRoute>} />
+      <Route path="/configuracion/plan-cuentas-niif" element={<ProtectedRoute><Layout><PlanCuentasNIIF /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/tipos-documentos" element={<ProtectedRoute><Layout><TiposDocumentos /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/centros-costo" element={<ProtectedRoute><Layout><CentrosDeCosto /></Layout></ProtectedRoute>} />
       <Route path="/configuracion/tipos-contrato" element={<ProtectedRoute><Layout><TiposContrato /></Layout></ProtectedRoute>} />
