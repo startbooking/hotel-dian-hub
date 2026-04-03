@@ -190,7 +190,7 @@ export default function DocumentoContable() {
       numeroConsecutivo: "", fechaCausacion: new Date(), terceroId: "",
       referenciaFactura: "", fechaFactura: new Date(), descripcionGasto: "",
       centroCostosId: "", subtotal: "0", iva: "0", retencionFuente: "0",
-      retencionIVA: "0", retencionICA: "0",
+      retencionIVA: "0", retencionICA: "0", esNIIF: false, cuentaNIIF: "", conceptoNIIF: "",
     },
   });
 
