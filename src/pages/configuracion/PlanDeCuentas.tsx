@@ -361,6 +361,7 @@ export default function PlanDeCuentas() {
             </Select>
           </div>
 
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -369,6 +370,9 @@ export default function PlanDeCuentas() {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Naturaleza</TableHead>
                 <TableHead>Nivel</TableHead>
+                <TableHead>Cuenta NIIF</TableHead>
+                <TableHead>Grupo NIIF</TableHead>
+                <TableHead>IFRS</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -381,11 +385,14 @@ export default function PlanDeCuentas() {
                   <TableCell className="capitalize">{cuenta.tipo}</TableCell>
                   <TableCell className="capitalize">{cuenta.naturaleza}</TableCell>
                   <TableCell>{cuenta.nivel}</TableCell>
+                  <TableCell className="font-mono text-xs">{cuenta.cuentaNIIF || "—"}</TableCell>
+                  <TableCell className="text-xs">{cuenta.grupoNIIF || "—"}</TableCell>
+                  <TableCell className="text-xs">{cuenta.clasificacionIFRS || "—"}</TableCell>
                   <TableCell>
                     {cuenta.bloqueado ? (
                       <span className="text-destructive">Bloqueado</span>
                     ) : (
-                      <span className="text-green-600">Activo</span>
+                      <span className="text-primary">Activo</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
