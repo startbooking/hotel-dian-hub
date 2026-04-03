@@ -605,6 +605,31 @@ export default function DocumentoContable() {
                 </CardContent>
               </Card>
 
+              {/* Ajuste NIIF */}
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Ajuste NIIF (Convergencia)</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField control={form.control} name="esNIIF" render={({ field }) => (
+                    <FormItem className="flex items-center gap-3">
+                      <FormControl>
+                        <input type="checkbox" checked={field.value || false} onChange={field.onChange} className="h-4 w-4 rounded border-input accent-primary" />
+                      </FormControl>
+                      <FormLabel className="!mt-0">Este documento tiene ajuste NIIF</FormLabel>
+                    </FormItem>
+                  )} />
+                  {form.watch("esNIIF") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField control={form.control} name="cuentaNIIF" render={({ field }) => (
+                        <FormItem><FormLabel>Cuenta NIIF</FormLabel><FormControl><Input placeholder="1.1.01 - Efectivo y equivalentes" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                      <FormField control={form.control} name="conceptoNIIF" render={({ field }) => (
+                        <FormItem><FormLabel>Concepto NIIF</FormLabel><FormControl><Input placeholder="Ajuste por valor razonable NIIF 9" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Distribución Contable */}
               <Card>
                 <CardHeader>
