@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, TrendingUp, Settings, DollarSign, Users, UserCog,
   Calculator, FileCheck, ChevronDown, Building2, BookOpen, FileType, Briefcase,
   Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail,
-  Scale, ArrowDownUp, BarChart3
+  Scale, ArrowDownUp, BarChart3, GitBranch, Globe
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
