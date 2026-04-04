@@ -219,6 +219,16 @@ export function AppSidebar() {
               />
 
               <CollapsibleMenu
+                label="Reportes NIIF"
+                icon={Globe}
+                basePath="/reportes-niif"
+                items={reportesNIIFSubItems}
+                open={reportesNIIFOpen}
+                onOpenChange={setReportesNIIFOpen}
+                sidebarOpen={open}
+              />
+
+              <CollapsibleMenu
                 label="Configuración"
                 icon={Settings}
                 basePath="/configuracion"
