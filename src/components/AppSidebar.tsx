@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, TrendingUp, Settings, DollarSign, Users, UserCog,
   Calculator, FileCheck, ChevronDown, Building2, BookOpen, FileType, Briefcase,
   Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail,
-  Scale, ArrowDownUp, BarChart3
+  Scale, ArrowDownUp, BarChart3, GitBranch, Globe
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -116,6 +116,14 @@ const reportesSubItems: MenuItem[] = [
   { title: "Flujos de Efectivo", url: "/reportes/flujos-efectivo", icon: ArrowDownUp },
 ];
 
+const reportesNIIFSubItems: MenuItem[] = [
+  { title: "Situación Financiera", url: "/reportes-niif/situacion-financiera", icon: Scale },
+  { title: "Resultado Integral", url: "/reportes-niif/resultado-integral", icon: TrendingUp },
+  { title: "Flujos de Efectivo", url: "/reportes-niif/flujos-efectivo", icon: ArrowDownUp },
+  { title: "Cambios Patrimonio", url: "/reportes-niif/cambios-patrimonio", icon: GitBranch },
+  { title: "Notas EE.FF.", url: "/reportes-niif/notas", icon: FileText },
+];
+
 const configuracionSubItems: MenuItem[] = [
   { title: "Plan de Cuentas (PUC)", url: "/configuracion/plan-cuentas", icon: BookOpen },
   { title: "Plan Cuentas NIIF", url: "/configuracion/plan-cuentas-niif", icon: BookOpen },
@@ -143,6 +151,7 @@ export function AppSidebar() {
   const [reportesOpen, setReportesOpen] = useState(location.pathname.startsWith("/reportes"));
   const [configuracionOpen, setConfiguracionOpen] = useState(location.pathname.startsWith("/configuracion"));
   const [opcionesOpen, setOpcionesOpen] = useState(location.pathname.startsWith("/opciones"));
+  const [reportesNIIFOpen, setReportesNIIFOpen] = useState(location.pathname.startsWith("/reportes-niif"));
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -206,6 +215,16 @@ export function AppSidebar() {
                 items={reportesSubItems}
                 open={reportesOpen}
                 onOpenChange={setReportesOpen}
+                sidebarOpen={open}
+              />
+
+              <CollapsibleMenu
+                label="Reportes NIIF"
+                icon={Globe}
+                basePath="/reportes-niif"
+                items={reportesNIIFSubItems}
+                open={reportesNIIFOpen}
+                onOpenChange={setReportesNIIFOpen}
                 sidebarOpen={open}
               />
 

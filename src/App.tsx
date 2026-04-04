@@ -44,6 +44,11 @@ import InformesCentro from "./pages/reportes/InformesCentro";
 import EstadoResultados from "./pages/reportes/EstadoResultados";
 import BalanceGeneral from "./pages/reportes/BalanceGeneral";
 import FlujosEfectivo from "./pages/reportes/FlujosEfectivo";
+import EstadoSituacionFinanciera from "./pages/reportes/niif/EstadoSituacionFinanciera";
+import EstadoResultadoIntegral from "./pages/reportes/niif/EstadoResultadoIntegral";
+import EstadoFlujosEfectivoNIIF from "./pages/reportes/niif/EstadoFlujosEfectivoNIIF";
+import CambiosPatrimonio from "./pages/reportes/niif/CambiosPatrimonio";
+import NotasEstadosFinancieros from "./pages/reportes/niif/NotasEstadosFinancieros";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -111,6 +116,12 @@ function AppRoutes() {
       <Route path="/reportes/estado-resultados" element={<ProtectedRoute><Layout><EstadoResultados /></Layout></ProtectedRoute>} />
       <Route path="/reportes/balance-general" element={<ProtectedRoute><Layout><BalanceGeneral /></Layout></ProtectedRoute>} />
       <Route path="/reportes/flujos-efectivo" element={<ProtectedRoute><Layout><FlujosEfectivo /></Layout></ProtectedRoute>} />
+      {/* Reportes NIIF */}
+      <Route path="/reportes-niif/situacion-financiera" element={<ProtectedRoute><Layout><EstadoSituacionFinanciera /></Layout></ProtectedRoute>} />
+      <Route path="/reportes-niif/resultado-integral" element={<ProtectedRoute><Layout><EstadoResultadoIntegral /></Layout></ProtectedRoute>} />
+      <Route path="/reportes-niif/flujos-efectivo" element={<ProtectedRoute><Layout><EstadoFlujosEfectivoNIIF /></Layout></ProtectedRoute>} />
+      <Route path="/reportes-niif/cambios-patrimonio" element={<ProtectedRoute><Layout><CambiosPatrimonio /></Layout></ProtectedRoute>} />
+      <Route path="/reportes-niif/notas" element={<ProtectedRoute><Layout><NotasEstadosFinancieros /></Layout></ProtectedRoute>} />
       <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
