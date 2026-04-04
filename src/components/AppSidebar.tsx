@@ -151,6 +151,7 @@ export function AppSidebar() {
   const [reportesOpen, setReportesOpen] = useState(location.pathname.startsWith("/reportes"));
   const [configuracionOpen, setConfiguracionOpen] = useState(location.pathname.startsWith("/configuracion"));
   const [opcionesOpen, setOpcionesOpen] = useState(location.pathname.startsWith("/opciones"));
+  const [reportesNIIFOpen, setReportesNIIFOpen] = useState(location.pathname.startsWith("/reportes-niif"));
 
   return (
     <Sidebar className="border-r border-sidebar-border">
