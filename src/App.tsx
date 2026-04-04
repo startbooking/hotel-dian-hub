@@ -44,6 +44,11 @@ import InformesCentro from "./pages/reportes/InformesCentro";
 import EstadoResultados from "./pages/reportes/EstadoResultados";
 import BalanceGeneral from "./pages/reportes/BalanceGeneral";
 import FlujosEfectivo from "./pages/reportes/FlujosEfectivo";
+import EstadoSituacionFinanciera from "./pages/reportes/niif/EstadoSituacionFinanciera";
+import EstadoResultadoIntegral from "./pages/reportes/niif/EstadoResultadoIntegral";
+import EstadoFlujosEfectivoNIIF from "./pages/reportes/niif/EstadoFlujosEfectivoNIIF";
+import CambiosPatrimonio from "./pages/reportes/niif/CambiosPatrimonio";
+import NotasEstadosFinancieros from "./pages/reportes/niif/NotasEstadosFinancieros";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
