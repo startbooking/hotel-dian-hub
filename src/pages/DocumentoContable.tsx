@@ -55,7 +55,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Calendar as CalendarIcon, Search, Edit, Trash2, FileText, Building2, Loader2 } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Search, Edit, Trash2, FileText, Building2, Loader2, Download } from "lucide-react";
+import { ImportarComprasModal } from "@/components/contabilidad/ImportarComprasModal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
