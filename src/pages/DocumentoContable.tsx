@@ -717,6 +717,13 @@ export default function DocumentoContable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal Importar Compras Electrónicas */}
+      <ImportarComprasModal
+        open={importarComprasOpen}
+        onOpenChange={setImportarComprasOpen}
+        onImportSuccess={() => fetchDocumentos()}
+      />
     </div>
   );
 }
