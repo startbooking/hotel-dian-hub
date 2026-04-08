@@ -24,6 +24,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,30 +32,40 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, Trash2, Plus, Download, FileText } from "lucide-react";
 import { api } from "@/services/api";
 
+interface FacturaItem {
+  codigo: string;
+  descripcion: string;
+  cantidad: number;
+  valorUnitario: number;
+  subtotal: number;
+  ivaPorc: number;
+  iva: number;
+  total: number;
+}
+
 interface FacturaDIAN {
   cufe: string;
   numero: string;
   prefijo: string;
   fecha: string;
+  formaPago: string;
   proveedor: {
     nombre: string;
     nit: string;
     direccion: string;
+    regimen: string;
   };
-  items: {
-    codigo: string;
-    descripcion: string;
-    cantidad: number;
-    valorUnitario: number;
-    iva: number;
-    total: number;
-  }[];
+  items: FacturaItem[];
   subtotal: number;
   iva: number;
   retencionFuente: number;
+  retencionFuentePorc: number;
   retencionIVA: number;
+  retencionIVAPorc: number;
   retencionICA: number;
+  retencionICAPorc: number;
   total: number;
+  totalPagar: number;
 }
 
 interface CuentaAsignada {
@@ -74,15 +85,121 @@ interface ImportarComprasModalProps {
 
 type Paso = "cufe" | "resultado" | "cuentas";
 
+// Mock de ejemplo de factura de compra electrónica
+const MOCK_FACTURA: FacturaDIAN = {
+  cufe: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6abcd1234",
+  numero: "990042351",
+  prefijo: "SETT",
+  fecha: "2025-04-05",
+  formaPago: "Crédito 30 días",
+  proveedor: {
+    nombre: "DISTRIBUIDORA EL GRAN PROVEEDOR S.A.S",
+    nit: "900.123.456-7",
+    direccion: "Cra 45 # 12-30, Bogotá D.C.",
+    regimen: "Responsable de IVA",
+  },
+  items: [
+    { codigo: "PRD-001", descripcion: "Papel bond carta x resma 500 hojas", cantidad: 20, valorUnitario: 12500, subtotal: 250000, ivaPorc: 19, iva: 47500, total: 297500 },
+    { codigo: "PRD-002", descripcion: "Tóner HP LaserJet 85A compatible", cantidad: 5, valorUnitario: 85000, subtotal: 425000, ivaPorc: 19, iva: 80750, total: 505750 },
+    { codigo: "PRD-003", descripcion: "Carpetas legajadoras oficio x 25 und", cantidad: 10, valorUnitario: 35000, subtotal: 350000, ivaPorc: 19, iva: 66500, total: 416500 },
+    { codigo: "SRV-001", descripcion: "Servicio de mantenimiento impresora", cantidad: 1, valorUnitario: 180000, subtotal: 180000, ivaPorc: 19, iva: 34200, total: 214200 },
+    { codigo: "PRD-004", descripcion: "Resaltadores surtidos x caja 12 und", cantidad: 8, valorUnitario: 22000, subtotal: 176000, ivaPorc: 0, iva: 0, total: 176000 },
+  ],
+  subtotal: 1381000,
+  iva: 228950,
+  retencionFuente: 48335,      // 3.5% sobre subtotal gravado (1381000)
+  retencionFuentePorc: 3.5,
+  retencionIVA: 34342,          // 15% sobre IVA
+  retencionIVAPorc: 15,
+  retencionICA: 13810,          // 1% sobre subtotal (actividad comercial Bogotá)
+  retencionICAPorc: 10,         // 10 x mil
+  total: 1609950,
+  totalPagar: 1513463,          // total - reteFuente - reteIVA - reteICA
+};
+
+function generarCuentasResumido(factura: FacturaDIAN): CuentaAsignada[] {
+  const cuentas: CuentaAsignada[] = [];
+  let id = 1;
+
+  // Débito: Compras / Gastos (subtotal productos)
+  cuentas.push({
+    id: String(id++),
+    codigoCuenta: "620501",
+    nombreCuenta: "Compras de mercancías",
+    tipo: "debito",
+    valor: factura.subtotal,
+    concepto: `Compra según Fac. ${factura.prefijo}-${factura.numero}`,
+  });
+
+  // Débito: IVA descontable
+  if (factura.iva > 0) {
+    cuentas.push({
+      id: String(id++),
+      codigoCuenta: "240810",
+      nombreCuenta: "IVA descontable en compras",
+      tipo: "debito",
+      valor: factura.iva,
+      concepto: `IVA Fac. ${factura.prefijo}-${factura.numero}`,
+    });
+  }
+
+  // Crédito: Retención en la fuente por pagar
+  if (factura.retencionFuente > 0) {
+    cuentas.push({
+      id: String(id++),
+      codigoCuenta: "236540",
+      nombreCuenta: `Retención en la fuente (${factura.retencionFuentePorc}%)`,
+      tipo: "credito",
+      valor: factura.retencionFuente,
+      concepto: `ReteFte ${factura.retencionFuentePorc}% Fac. ${factura.prefijo}-${factura.numero}`,
+    });
+  }
+
+  // Crédito: Retención de IVA por pagar
+  if (factura.retencionIVA > 0) {
+    cuentas.push({
+      id: String(id++),
+      codigoCuenta: "236701",
+      nombreCuenta: `Retención de IVA (${factura.retencionIVAPorc}%)`,
+      tipo: "credito",
+      valor: factura.retencionIVA,
+      concepto: `ReteIVA ${factura.retencionIVAPorc}% Fac. ${factura.prefijo}-${factura.numero}`,
+    });
+  }
+
+  // Crédito: Retención de ICA por pagar
+  if (factura.retencionICA > 0) {
+    cuentas.push({
+      id: String(id++),
+      codigoCuenta: "236805",
+      nombreCuenta: `Retención de ICA (${factura.retencionICAPorc}‰)`,
+      tipo: "credito",
+      valor: factura.retencionICA,
+      concepto: `ReteICA ${factura.retencionICAPorc}‰ Fac. ${factura.prefijo}-${factura.numero}`,
+    });
+  }
+
+  // Crédito: Cuenta por pagar al proveedor (neto a pagar)
+  cuentas.push({
+    id: String(id++),
+    codigoCuenta: "220501",
+    nombreCuenta: "Proveedores nacionales",
+    tipo: "credito",
+    valor: factura.totalPagar,
+    concepto: `CxP ${factura.proveedor.nombre} Fac. ${factura.prefijo}-${factura.numero}`,
+  });
+
+  return cuentas;
+}
+
 export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: ImportarComprasModalProps) {
   const [paso, setPaso] = useState<Paso>("cufe");
   const [cufe, setCufe] = useState("");
-  const [tipoDocumento, setTipoDocumento] = useState<"detallado" | "resumido">("detallado");
+  const [tipoDocumento, setTipoDocumento] = useState<"detallado" | "resumido">("resumido");
   const [loading, setLoading] = useState(false);
   const [factura, setFactura] = useState<FacturaDIAN | null>(null);
   const [cuentas, setCuentas] = useState<CuentaAsignada[]>([]);
 
-  // New account form
   const [nuevaCuenta, setNuevaCuenta] = useState({
     codigoCuenta: "",
     nombreCuenta: "",
@@ -93,7 +210,7 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
 
   const { toast } = useToast();
 
-  const formatCurrency = (val: number) =>
+  const fmt = (val: number) =>
     new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", minimumFractionDigits: 0 }).format(val);
 
   const handleConsultarCUFE = async () => {
@@ -109,13 +226,27 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
         setPaso("resultado");
         toast({ title: "Documento encontrado", description: `Factura ${response.data.numero} de ${response.data.proveedor.nombre}` });
       } else {
-        toast({ title: "No encontrado", description: response.error || "No se encontró el documento con el CUFE proporcionado", variant: "destructive" });
+        // Usar mock como fallback para demostración
+        setFactura(MOCK_FACTURA);
+        setPaso("resultado");
+        toast({ title: "Modo demo", description: "Se cargó una factura de ejemplo para demostración" });
       }
     } catch {
-      toast({ title: "Error", description: "Error al consultar el CUFE en la DIAN", variant: "destructive" });
+      // Fallback al mock
+      setFactura(MOCK_FACTURA);
+      setPaso("resultado");
+      toast({ title: "Modo demo", description: "Se cargó una factura de ejemplo para demostración" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleContinuarACuentas = () => {
+    if (!factura) return;
+    if (tipoDocumento === "resumido") {
+      setCuentas(generarCuentasResumido(factura));
+    }
+    setPaso("cuentas");
   };
 
   const handleAgregarCuenta = () => {
@@ -164,7 +295,7 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
   const handleReset = () => {
     setPaso("cufe");
     setCufe("");
-    setTipoDocumento("detallado");
+    setTipoDocumento("resumido");
     setFactura(null);
     setCuentas([]);
     setNuevaCuenta({ codigoCuenta: "", nombreCuenta: "", tipo: "debito", valor: "", concepto: "" });
@@ -172,14 +303,14 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleReset(); onOpenChange(v); }}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
             Importar Compras Electrónicas
           </DialogTitle>
           <DialogDescription>
-            Consulte un documento electrónico de la DIAN mediante su CUFE y asigne las cuentas contables
+            Consulte un documento electrónico de la DIAN mediante su CUFE y genere el asiento contable
           </DialogDescription>
         </DialogHeader>
 
@@ -188,7 +319,7 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
           {(["cufe", "resultado", "cuentas"] as Paso[]).map((p, i) => (
             <div key={p} className="flex items-center gap-2">
               <Badge variant={paso === p ? "default" : "outline"} className="text-xs">
-                {i + 1}. {p === "cufe" ? "CUFE" : p === "resultado" ? "Resultado" : "Cuentas"}
+                {i + 1}. {p === "cufe" ? "CUFE" : p === "resultado" ? "Factura" : "Contabilización"}
               </Badge>
               {i < 2 && <span className="text-muted-foreground">→</span>}
             </div>
@@ -213,20 +344,20 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
             </div>
 
             <div className="space-y-3">
-              <Label>Tipo de documento a generar</Label>
+              <Label>Tipo de contabilización</Label>
               <RadioGroup value={tipoDocumento} onValueChange={(v) => setTipoDocumento(v as "detallado" | "resumido")}>
-                <div className="flex items-start gap-3 p-3 border rounded-lg">
-                  <RadioGroupItem value="detallado" id="detallado" className="mt-1" />
-                  <div>
-                    <Label htmlFor="detallado" className="font-medium cursor-pointer">Detallado</Label>
-                    <p className="text-xs text-muted-foreground">Incluye cada ítem de la factura como línea independiente en el documento contable</p>
-                  </div>
-                </div>
                 <div className="flex items-start gap-3 p-3 border rounded-lg">
                   <RadioGroupItem value="resumido" id="resumido" className="mt-1" />
                   <div>
                     <Label htmlFor="resumido" className="font-medium cursor-pointer">Resumido</Label>
-                    <p className="text-xs text-muted-foreground">Agrupa todos los ítems en una sola línea con el total de la factura</p>
+                    <p className="text-xs text-muted-foreground">Genera líneas por: productos, IVA, retenciones (fuente, IVA, ICA) y cuenta por pagar al proveedor</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 border rounded-lg">
+                  <RadioGroupItem value="detallado" id="detallado" className="mt-1" />
+                  <div>
+                    <Label htmlFor="detallado" className="font-medium cursor-pointer">Detallado</Label>
+                    <p className="text-xs text-muted-foreground">Incluye cada ítem como línea independiente en el documento contable</p>
                   </div>
                 </div>
               </RadioGroup>
@@ -239,37 +370,37 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
           </div>
         )}
 
-        {/* Step 2: Result */}
+        {/* Step 2: Invoice result with products and taxes */}
         {paso === "resultado" && factura && (
           <div className="space-y-4">
+            {/* Provider info */}
             <Card>
-              <CardContent className="pt-4 space-y-3">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Número:</span>
-                    <span className="ml-2 font-medium">{factura.prefijo}-{factura.numero}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Fecha:</span>
-                    <span className="ml-2 font-medium">{factura.fecha}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-muted-foreground">Proveedor:</span>
-                    <span className="ml-2 font-medium">{factura.proveedor.nombre} - NIT: {factura.proveedor.nit}</span>
-                  </div>
+              <CardContent className="pt-4 space-y-2">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                  <div><span className="text-muted-foreground">Número:</span> <span className="font-medium">{factura.prefijo}-{factura.numero}</span></div>
+                  <div><span className="text-muted-foreground">Fecha:</span> <span className="font-medium">{factura.fecha}</span></div>
+                  <div><span className="text-muted-foreground">Proveedor:</span> <span className="font-medium">{factura.proveedor.nombre}</span></div>
+                  <div><span className="text-muted-foreground">NIT:</span> <span className="font-medium">{factura.proveedor.nit}</span></div>
+                  <div><span className="text-muted-foreground">Dirección:</span> <span className="font-medium">{factura.proveedor.direccion}</span></div>
+                  <div><span className="text-muted-foreground">Régimen:</span> <span className="font-medium">{factura.proveedor.regimen}</span></div>
+                  <div><span className="text-muted-foreground">Forma de pago:</span> <span className="font-medium">{factura.formaPago}</span></div>
                 </div>
               </CardContent>
             </Card>
 
-            {tipoDocumento === "detallado" && factura.items.length > 0 && (
+            {/* Products table */}
+            <div>
+              <h4 className="text-sm font-semibold mb-2">Productos / Servicios</h4>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Código</TableHead>
+                    <TableHead className="w-24">Código</TableHead>
                     <TableHead>Descripción</TableHead>
-                    <TableHead className="text-right">Cant.</TableHead>
-                    <TableHead className="text-right">Vr. Unit.</TableHead>
-                    <TableHead className="text-right">IVA</TableHead>
+                    <TableHead className="text-right w-16">Cant.</TableHead>
+                    <TableHead className="text-right">Vr. Unitario</TableHead>
+                    <TableHead className="text-right">Subtotal</TableHead>
+                    <TableHead className="text-right w-16">IVA %</TableHead>
+                    <TableHead className="text-right">IVA $</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -277,28 +408,80 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
                   {factura.items.map((item, i) => (
                     <TableRow key={i}>
                       <TableCell className="font-mono text-xs">{item.codigo}</TableCell>
-                      <TableCell>{item.descripcion}</TableCell>
+                      <TableCell className="text-sm">{item.descripcion}</TableCell>
                       <TableCell className="text-right">{item.cantidad}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.valorUnitario)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.iva)}</TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(item.total)}</TableCell>
+                      <TableCell className="text-right">{fmt(item.valorUnitario)}</TableCell>
+                      <TableCell className="text-right">{fmt(item.subtotal)}</TableCell>
+                      <TableCell className="text-right">{item.ivaPorc}%</TableCell>
+                      <TableCell className="text-right">{fmt(item.iva)}</TableCell>
+                      <TableCell className="text-right font-medium">{fmt(item.total)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-right font-semibold">Totales:</TableCell>
+                    <TableCell className="text-right font-bold">{fmt(factura.subtotal)}</TableCell>
+                    <TableCell />
+                    <TableCell className="text-right font-bold">{fmt(factura.iva)}</TableCell>
+                    <TableCell className="text-right font-bold">{fmt(factura.subtotal + factura.iva)}</TableCell>
+                  </TableRow>
+                </TableFooter>
               </Table>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-              <Card><CardContent className="p-3 text-center"><p className="text-muted-foreground text-xs">Subtotal</p><p className="font-bold">{formatCurrency(factura.subtotal)}</p></CardContent></Card>
-              <Card><CardContent className="p-3 text-center"><p className="text-muted-foreground text-xs">IVA</p><p className="font-bold">{formatCurrency(factura.iva)}</p></CardContent></Card>
-              <Card><CardContent className="p-3 text-center"><p className="text-muted-foreground text-xs">Rete Fuente</p><p className="font-bold">{formatCurrency(factura.retencionFuente)}</p></CardContent></Card>
-              <Card><CardContent className="p-3 text-center"><p className="text-muted-foreground text-xs">Rete IVA</p><p className="font-bold">{formatCurrency(factura.retencionIVA)}</p></CardContent></Card>
-              <Card><CardContent className="p-3 text-center"><p className="text-muted-foreground text-xs">Total</p><p className="font-bold text-primary">{formatCurrency(factura.total)}</p></CardContent></Card>
             </div>
 
+            {/* Tax and retention summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <p className="text-muted-foreground text-xs">Subtotal</p>
+                  <p className="font-bold text-sm">{fmt(factura.subtotal)}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <p className="text-muted-foreground text-xs">IVA (19%)</p>
+                  <p className="font-bold text-sm">{fmt(factura.iva)}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-3 text-center">
+                  <p className="text-muted-foreground text-xs">Total Bruto</p>
+                  <p className="font-bold text-sm">{fmt(factura.total)}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-primary/30">
+                <CardContent className="p-3 text-center">
+                  <p className="text-muted-foreground text-xs">Total a Pagar</p>
+                  <p className="font-bold text-sm text-primary">{fmt(factura.totalPagar)}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Retentions detail */}
+            <Card>
+              <CardContent className="pt-4">
+                <h4 className="text-sm font-semibold mb-2">Retenciones aplicadas</h4>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-muted-foreground">ReteFuente ({factura.retencionFuentePorc}%)</span>
+                    <span className="font-medium text-destructive">-{fmt(factura.retencionFuente)}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-muted-foreground">ReteIVA ({factura.retencionIVAPorc}%)</span>
+                    <span className="font-medium text-destructive">-{fmt(factura.retencionIVA)}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="text-muted-foreground">ReteICA ({factura.retencionICAPorc}‰)</span>
+                    <span className="font-medium text-destructive">-{fmt(factura.retencionICA)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setPaso("cufe")}>Atrás</Button>
-              <Button onClick={() => setPaso("cuentas")} className="flex-1">Continuar a asignar cuentas</Button>
+              <Button variant="outline" onClick={() => { setPaso("cufe"); setCuentas([]); }}>Atrás</Button>
+              <Button onClick={handleContinuarACuentas} className="flex-1">Continuar a contabilización</Button>
             </div>
           </div>
         )}
@@ -308,7 +491,12 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
           <div className="space-y-4">
             <Card>
               <CardContent className="pt-4">
-                <p className="text-sm text-muted-foreground mb-1">Factura: <span className="font-medium text-foreground">{factura.prefijo}-{factura.numero}</span> | Proveedor: <span className="font-medium text-foreground">{factura.proveedor.nombre}</span> | Total: <span className="font-bold text-primary">{formatCurrency(factura.total)}</span></p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <span>Factura: <strong>{factura.prefijo}-{factura.numero}</strong></span>
+                  <span>Proveedor: <strong>{factura.proveedor.nombre}</strong></span>
+                  <span>Total: <strong className="text-primary">{fmt(factura.total)}</strong></span>
+                  <Badge variant="outline">{tipoDocumento === "resumido" ? "Resumido" : "Detallado"}</Badge>
+                </div>
               </CardContent>
             </Card>
 
@@ -364,25 +552,27 @@ export function ImportarComprasModal({ open, onOpenChange, onImportSuccess }: Im
                       <TableCell className="font-mono text-xs">{c.codigoCuenta}</TableCell>
                       <TableCell className="text-sm">{c.nombreCuenta}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{c.concepto}</TableCell>
-                      <TableCell className="text-right font-medium">{c.tipo === "debito" ? formatCurrency(c.valor) : ""}</TableCell>
-                      <TableCell className="text-right font-medium">{c.tipo === "credito" ? formatCurrency(c.valor) : ""}</TableCell>
+                      <TableCell className="text-right font-medium">{c.tipo === "debito" ? fmt(c.valor) : ""}</TableCell>
+                      <TableCell className="text-right font-medium">{c.tipo === "credito" ? fmt(c.valor) : ""}</TableCell>
                       <TableCell className="text-center">
                         <Button variant="ghost" size="icon" onClick={() => eliminarCuenta(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableRow className="bg-muted/50 font-bold">
-                    <TableCell colSpan={3} className="text-right">Totales:</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totalDebitos)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totalCreditos)}</TableCell>
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-right font-bold">Totales:</TableCell>
+                    <TableCell className="text-right font-bold">{fmt(totalDebitos)}</TableCell>
+                    <TableCell className="text-right font-bold">{fmt(totalCreditos)}</TableCell>
                     <TableCell />
                   </TableRow>
-                </TableBody>
+                </TableFooter>
               </Table>
             )}
 
             {!estaBalanceado && cuentas.length > 0 && (
-              <p className="text-sm text-destructive">⚠ Los débitos y créditos no están balanceados. Diferencia: {formatCurrency(Math.abs(totalDebitos - totalCreditos))}</p>
+              <p className="text-sm text-destructive">⚠ Los débitos y créditos no están balanceados. Diferencia: {fmt(Math.abs(totalDebitos - totalCreditos))}</p>
             )}
             {estaBalanceado && (
               <p className="text-sm text-green-600">✓ El documento está balanceado</p>
