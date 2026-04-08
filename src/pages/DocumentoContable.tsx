@@ -385,10 +385,16 @@ export default function DocumentoContable() {
           <h1 className="text-3xl font-bold">Documento Contable</h1>
           <p className="text-muted-foreground mt-1">Comprobante de causación y registro de cuentas por pagar</p>
         </div>
-        <Button className="bg-gradient-to-r from-primary to-primary/80" onClick={() => { setEditandoDocumento(null); form.reset(); setCuentasContables([]); setDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Documento
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportarComprasOpen(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Importar Compras Electrónicas
+          </Button>
+          <Button className="bg-gradient-to-r from-primary to-primary/80" onClick={() => { setEditandoDocumento(null); form.reset(); setCuentasContables([]); setDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Documento
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
