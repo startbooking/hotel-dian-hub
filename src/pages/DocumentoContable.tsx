@@ -182,6 +182,7 @@ export default function DocumentoContable() {
   const [busqueda, setBusqueda] = useState("");
   const [documentoAEliminar, setDocumentoAEliminar] = useState<string | null>(null);
   const [editandoDocumento, setEditandoDocumento] = useState<Documento | null>(null);
+  const [importarComprasOpen, setImportarComprasOpen] = useState(false);
   const { toast } = useToast();
 
   // --- Forms ---
