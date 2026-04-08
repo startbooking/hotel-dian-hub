@@ -242,6 +242,14 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
+
+  // Consultar CUFE en la DIAN
+  async consultarCUFE(cufe: string, tipo: "detallado" | "resumido"): Promise<ApiResponse<any>> {
+    return this.fetchData<any>(`/api/consultarCUFE`, CONT_API_URL, {
+      method: "POST",
+      body: JSON.stringify({ cufe, tipo }),
+    });
+  }
 }
 
 export const api = new ApiService();
