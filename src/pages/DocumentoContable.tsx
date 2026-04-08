@@ -55,7 +55,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Calendar as CalendarIcon, Search, Edit, Trash2, FileText, Building2, Loader2 } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Search, Edit, Trash2, FileText, Building2, Loader2, Download } from "lucide-react";
+import { ImportarComprasModal } from "@/components/contabilidad/ImportarComprasModal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -181,6 +182,7 @@ export default function DocumentoContable() {
   const [busqueda, setBusqueda] = useState("");
   const [documentoAEliminar, setDocumentoAEliminar] = useState<string | null>(null);
   const [editandoDocumento, setEditandoDocumento] = useState<Documento | null>(null);
+  const [importarComprasOpen, setImportarComprasOpen] = useState(false);
   const { toast } = useToast();
 
   // --- Forms ---
@@ -383,10 +385,16 @@ export default function DocumentoContable() {
           <h1 className="text-3xl font-bold">Documento Contable</h1>
           <p className="text-muted-foreground mt-1">Comprobante de causación y registro de cuentas por pagar</p>
         </div>
-        <Button className="bg-gradient-to-r from-primary to-primary/80" onClick={() => { setEditandoDocumento(null); form.reset(); setCuentasContables([]); setDialogOpen(true); }}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Documento
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportarComprasOpen(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Importar Compras Electrónicas
+          </Button>
+          <Button className="bg-gradient-to-r from-primary to-primary/80" onClick={() => { setEditandoDocumento(null); form.reset(); setCuentasContables([]); setDialogOpen(true); }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Documento
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -709,6 +717,13 @@ export default function DocumentoContable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal Importar Compras Electrónicas */}
+      <ImportarComprasModal
+        open={importarComprasOpen}
+        onOpenChange={setImportarComprasOpen}
+        onImportSuccess={() => fetchDocumentos()}
+      />
     </div>
   );
 }
