@@ -89,6 +89,7 @@ const menuItems: MenuItem[] = [
   { title: "Datos Compañía", url: "/companias", icon: Building2 },
   { title: "Impuestos", url: "/impuestos", icon: Receipt },
   { title: "Medios Magnéticos", url: "/medios-magneticos", icon: Database },
+  { title: "Conciliación Bancaria", url: "/conciliacion-bancaria", icon: Landmark },
   { title: "Usuarios", url: "/usuarios", icon: Users },
 ];
 
