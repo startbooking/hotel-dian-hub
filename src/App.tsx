@@ -33,6 +33,7 @@ import Bancos from "./pages/configuracion/Bancos";
 import EPSPage from "./pages/configuracion/EPS";
 import ARLPage from "./pages/configuracion/ARL";
 import MediosMagneticos from "./pages/medios-magneticos/MediosMagneticos";
+import ConciliacionBancaria from "./pages/ConciliacionBancaria";
 import CertificadoRetenciones from "./pages/opciones/CertificadoRetenciones";
 import CertificadoIVA from "./pages/opciones/CertificadoIVA";
 import CertificadoICA from "./pages/opciones/CertificadoICA";
@@ -87,6 +88,7 @@ function AppRoutes() {
       <Route path="/companias" element={<ProtectedRoute><Layout><Companias /></Layout></ProtectedRoute>} />
       <Route path="/impuestos" element={<ProtectedRoute><Layout><Impuestos /></Layout></ProtectedRoute>} />
       <Route path="/medios-magneticos" element={<ProtectedRoute><Layout><MediosMagneticos /></Layout></ProtectedRoute>} />
+      <Route path="/conciliacion-bancaria" element={<ProtectedRoute><Layout><ConciliacionBancaria /></Layout></ProtectedRoute>} />
       <Route path="/documentos/facturar" element={<ProtectedRoute><Layout><Facturar /></Layout></ProtectedRoute>} />
       <Route path="/documentos/soporte" element={<ProtectedRoute><Layout><DocumentoSoporte /></Layout></ProtectedRoute>} />
       <Route path="/documentos/notas-credito" element={<ProtectedRoute><Layout><NotasCredito /></Layout></ProtectedRoute>} />
