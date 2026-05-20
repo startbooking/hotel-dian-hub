@@ -39,23 +39,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedUser = localStorage.getItem("auth_user");
       const storedToken = localStorage.getItem("auth_token");
       
-      if (storedUser && storedToken) {
+      if (storedUser) {
+        // Restore stored session immediately so protected routes work after reload
         try {
-          // Try to validate token with backend
-          const response = await api.validateToken(storedToken);
-          if (response.success && response.data) {
-            setUser(response.data);
-          } else {
-            // Fallback to stored user if backend is unavailable
-            setUser(JSON.parse(storedUser));
-          }
+          setUser(JSON.parse(storedUser));
         } catch {
-          // If validation fails, use stored user as fallback
+          localStorage.removeItem("auth_user");
+          localStorage.removeItem("auth_token");
+        }
+
+        // If we have a token, try to refresh the user from backend in background
+        if (storedToken) {
           try {
-            setUser(JSON.parse(storedUser));
+            const response = await api.validateToken(storedToken);
+            if (response.success && response.data) {
+              setUser(response.data);
+            }
           } catch {
-            localStorage.removeItem("auth_user");
-            localStorage.removeItem("auth_token");
+            // Keep stored user as fallback when backend is unavailable
           }
         }
       }
