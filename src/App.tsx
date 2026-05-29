@@ -32,6 +32,7 @@ import TiposContrato from "./pages/configuracion/TiposContrato";
 import Bancos from "./pages/configuracion/Bancos";
 import EPSPage from "./pages/configuracion/EPS";
 import ARLPage from "./pages/configuracion/ARL";
+import Usuarios from "./pages/configuracion/Usuarios";
 import MediosMagneticos from "./pages/medios-magneticos/MediosMagneticos";
 import ConciliacionBancaria from "./pages/ConciliacionBancaria";
 import CertificadoRetenciones from "./pages/opciones/CertificadoRetenciones";
@@ -124,7 +125,7 @@ function AppRoutes() {
       <Route path="/reportes-niif/flujos-efectivo" element={<ProtectedRoute><Layout><EstadoFlujosEfectivoNIIF /></Layout></ProtectedRoute>} />
       <Route path="/reportes-niif/cambios-patrimonio" element={<ProtectedRoute><Layout><CambiosPatrimonio /></Layout></ProtectedRoute>} />
       <Route path="/reportes-niif/notas" element={<ProtectedRoute><Layout><NotasEstadosFinancieros /></Layout></ProtectedRoute>} />
-      <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+      <Route path="/usuarios" element={<ProtectedRoute><Layout><Usuarios /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
