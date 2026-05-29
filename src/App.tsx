@@ -125,7 +125,7 @@ function AppRoutes() {
       <Route path="/reportes-niif/flujos-efectivo" element={<ProtectedRoute><Layout><EstadoFlujosEfectivoNIIF /></Layout></ProtectedRoute>} />
       <Route path="/reportes-niif/cambios-patrimonio" element={<ProtectedRoute><Layout><CambiosPatrimonio /></Layout></ProtectedRoute>} />
       <Route path="/reportes-niif/notas" element={<ProtectedRoute><Layout><NotasEstadosFinancieros /></Layout></ProtectedRoute>} />
-      <Route path="/usuarios" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+      <Route path="/usuarios" element={<ProtectedRoute><Layout><Usuarios /></Layout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
