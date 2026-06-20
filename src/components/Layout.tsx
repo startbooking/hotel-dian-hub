@@ -31,6 +31,10 @@ const roleLabels: Record<string, string> = {
 export function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showVenc, setShowVenc] = useState(false);
+
+  const today = new Date();
+  const vencMes = getVencimientosMes(today.getFullYear(), today.getMonth()).length;
 
   const handleLogout = () => {
     logout();
@@ -49,6 +53,16 @@ export function Layout({ children }: LayoutProps) {
             </div>
             
             <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" className="relative gap-2" onClick={() => setShowVenc(true)}>
+                <CalendarClock className="h-5 w-5" />
+                <span className="hidden md:inline">Vencimientos DIAN</span>
+                {vencMes > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-warning text-warning-foreground text-xs flex items-center justify-center">
+                    {vencMes}
+                  </span>
+                )}
+              </Button>
+
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
