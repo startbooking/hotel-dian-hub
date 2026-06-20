@@ -104,6 +104,7 @@ export function Layout({ children }: LayoutProps) {
           </main>
         </div>
       </div>
+      <VencimientosModal open={showVenc} onOpenChange={setShowVenc} />
     </SidebarProvider>
   );
 }
