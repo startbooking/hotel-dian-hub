@@ -1,8 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { Bell, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { VencimientosModal } from "@/components/VencimientosModal";
+import { getVencimientosMes } from "@/data/vencimientosDIAN";
 
 interface LayoutProps {
   children: ReactNode;
