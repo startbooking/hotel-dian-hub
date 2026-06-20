@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, TrendingUp, Settings, DollarSign, Users, UserCog,
   Calculator, FileCheck, ChevronDown, Building2, BookOpen, FileType, Briefcase,
   Receipt, CreditCard, Upload, Database, MoreHorizontal, FileSpreadsheet, Landmark, Mail,
-  Scale, ArrowDownUp, BarChart3, GitBranch, Globe
+  Scale, ArrowDownUp, BarChart3, GitBranch, Globe, CalendarClock
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -90,6 +90,7 @@ const menuItems: MenuItem[] = [
   { title: "Impuestos", url: "/impuestos", icon: Receipt },
   { title: "Medios Magnéticos", url: "/medios-magneticos", icon: Database },
   { title: "Conciliación Bancaria", url: "/conciliacion-bancaria", icon: Landmark },
+  { title: "Vencimientos DIAN", url: "/vencimientos-dian", icon: CalendarClock },
   { title: "Usuarios", url: "/usuarios", icon: Users },
 ];
 
